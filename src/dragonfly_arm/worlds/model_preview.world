@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <world name="default">
+    <!-- Self-contained preview; no online model://sun or ground downloads. -->
+    <physics name="preview_physics" type="ode">
+      <max_step_size>0.002</max_step_size>
+      <real_time_factor>1.0</real_time_factor>
+    </physics>
+    <!-- Declaring a world plugin disables Gazebo Sim's default server plugin set,
+         so keep all core systems explicit before adding the sensor system. -->
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-scene-broadcaster-system" name="gz::sim::systems::SceneBroadcaster"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <scene><ambient>0.6 0.6 0.6 1</ambient><background>0.88 0.90 0.93 1</background><shadows>true</shadows></scene>
+    <light name="sun" type="directional">
+      <cast_shadows>true</cast_shadows><diffuse>0.8 0.8 0.8 1</diffuse><specular>0.2 0.2 0.2 1</specular><direction>-0.4 0.2 -0.8</direction>
+    </light>
+    <light name="fill" type="directional">
+      <cast_shadows>false</cast_shadows><diffuse>0.35 0.35 0.35 1</diffuse><direction>0.3 -0.7 -0.3</direction>
+    </light>
+    <model name="ground_plane"><static>true</static><link name="ground">
+      <collision name="ground_collision"><geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry></collision>
+      <visual name="ground_visual"><geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry><material><ambient>0.7 0.72 0.75 1</ambient><diffuse>0.7 0.72 0.75 1</diffuse></material></visual>
+    </link></model>
+  </world>
+</sdf>

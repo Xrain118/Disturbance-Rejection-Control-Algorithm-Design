@@ -1,0 +1,17 @@
+geometry_msgs/PoseStamped target
+float64[5] seed
+bool use_seed
+---
+uint8 STATUS_OK=0
+uint8 STATUS_INVALID_INPUT=1
+uint8 STATUS_INVALID_FRAME=2
+uint8 STATUS_UNREACHABLE=3
+uint8 STATUS_ORIENTATION_MISMATCH=4
+uint8 STATUS_JOINT_LIMIT=5
+bool success
+uint8 status
+string message
+float64[5] joint_positions
+uint32 candidate_count
+float64 position_error
+float64 orientation_error

@@ -1,0 +1,7 @@
+# 0: query, 1: disable, 2: enable/set rate. No motion commands.
+uint8 operation
+uint8 rate_hz
+---
+# accepted only means queued locally; device acknowledgment arrives on config_ack.
+bool accepted
+string message

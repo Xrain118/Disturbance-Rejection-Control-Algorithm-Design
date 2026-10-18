@@ -1,0 +1,19 @@
+build/
+install/
+build-flight/
+install-flight/
+log/
+__pycache__/
+*.pyc
+.pytest_cache/
+.vscode/
+
+# Local reference originals; the reproducible PX4 adaptation is shipped as a patch.
+src/dragonfly_flight/config/px4_vector/original/
+
+/config/local.env
+/.pytest_cache/
+*.egg-info/
+
+build-hardware/
+install-hardware/

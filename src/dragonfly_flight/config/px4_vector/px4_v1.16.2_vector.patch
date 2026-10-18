@@ -1,0 +1,1075 @@
+diff --git a/src/lib/control_allocation/control_allocation/DragonflyAllocation.hpp b/src/lib/control_allocation/control_allocation/DragonflyAllocation.hpp
+new file mode 100644
+index 0000000000..6b142006e3
+--- /dev/null
++++ b/src/lib/control_allocation/control_allocation/DragonflyAllocation.hpp
+@@ -0,0 +1,269 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++#pragma once
++
++#include <matrix/matrix/math.hpp>
++#include <mathlib/mathlib.h>
++#include <cmath>
++
++// Geometry is expressed in body FLU, as in the URDF. SI units throughout.
++struct DragonflyGeometry {
++	float mass{4.628f}, radius{0.692820323f}, spacing{0.36f};
++	float height{0.06f}, hub_height{0.038f}, max_thrust{15.13356f};
++	float moment{0.02f}, tilt_limit{1.570796327f}, tilt_rate{0.5f};
++	float accel_scale{19.62f}, rate_scale{26.6666667f};
++	matrix::Vector3f com;
++	matrix::Matrix3f inertia;
++};
++
++class DragonflyAllocation
++{
++public:
++	using State = matrix::Vector<float, 12>;
++	using Wrench = matrix::Vector<float, 6>;
++	DragonflyGeometry geometry;
++	State state;
++	bool initialized{false};
++
++	matrix::Matrix<float, 6, 6> effectiveness(const State &z) const
++	{
++		matrix::Matrix<float, 6, 6> a;
++
++		for (int k = 0; k < 3; ++k) {
++			const float yaw = k * 2.f * M_PI_F / 3.f;
++			const float ca = cosf(z(6 + 2 * k)), sa = sinf(z(6 + 2 * k));
++			const float cb = cosf(z(7 + 2 * k)), sb = sinf(z(7 + 2 * k));
++			const matrix::Dcmf rz(matrix::Eulerf(0.f, 0.f, yaw));
++			const matrix::Dcmf rx(matrix::Eulerf(z(6 + 2 * k), 0.f, 0.f));
++			const matrix::Dcmf ry(matrix::Eulerf(0.f, z(7 + 2 * k), 0.f));
++			const matrix::Dcmf rotation = rz * rx * ry;
++			const matrix::Vector3f axis = rz * matrix::Vector3f(sb, -sa * cb, ca * cb);
++			const matrix::Vector3f center = rz * matrix::Vector3f(geometry.radius, 0.f, geometry.height);
++
++			for (int side = 0; side < 2; ++side) {
++				const float sign = side == 0 ? 1.f : -1.f;
++				const matrix::Vector3f p = center + rotation * matrix::Vector3f(0.f, sign * geometry.spacing / 2.f,
++							   geometry.hub_height);
++				const matrix::Vector3f torque = p.cross(axis) - sign * geometry.moment * axis;
++
++				for (int i = 0; i < 3; ++i) {
++					a(i, 2 * k + side) = axis(i);
++					a(i + 3, 2 * k + side) = torque(i);
++				}
++			}
++		}
++
++		return a;
++	}
++
++	Wrench wrench(const State &z) const
++	{
++		matrix::Vector<float, 6> forces;
++
++		for (int i = 0; i < 6; ++i) { forces(i) = z(i); }
++
++		return effectiveness(z) * forces;
++	}
++
++	// Bounded least squares active-set solver. Double precision avoids the
++	// poorly conditioned motor nullspace of three paired propulsion units.
++	static bool bounded(const double h[12][12], const double b[12], const double lo[12],
++			    const double hi[12], double x[12])
++	{
++		int active[12] {};
++
++		for (int i = 0; i < 12; ++i) {
++			x[i] = fmax(lo[i], fmin(hi[i], 0.));
++
++			if (x[i] <= lo[i] + 1e-10) { active[i] = -1; }
++
++			if (x[i] >= hi[i] - 1e-10) { active[i] = 1; }
++		}
++
++		for (int iteration = 0; iteration < 100; ++iteration) {
++			double a[12][13] {};
++
++			for (int i = 0; i < 12; ++i) {
++				if (active[i]) { a[i][i] = 1.; a[i][12] = x[i]; continue; }
++
++				a[i][12] = b[i];
++
++				for (int j = 0; j < 12; ++j) {
++					if (active[j]) { a[i][12] -= h[i][j] * x[j]; }
++
++					else { a[i][j] = h[i][j]; }
++				}
++			}
++
++			for (int k = 0; k < 12; ++k) {
++				int pivot = k;
++
++				for (int i = k + 1; i < 12; ++i) { if (fabs(a[i][k]) > fabs(a[pivot][k])) { pivot = i; } }
++
++				if (fabs(a[pivot][k]) < 1e-12) { return false; }
++
++				for (int j = k; j < 13; ++j) { const double tmp = a[k][j]; a[k][j] = a[pivot][j]; a[pivot][j] = tmp; }
++
++				const double divisor = a[k][k];
++
++				for (int j = k; j < 13; ++j) { a[k][j] /= divisor; }
++
++				for (int i = 0; i < 12; ++i) {
++					if (i == k) { continue; }
++
++					const double factor = a[i][k];
++
++					for (int j = k; j < 13; ++j) { a[i][j] -= factor * a[k][j]; }
++				}
++			}
++
++			double alpha = 1.; int hit = -1, hit_side = 0;
++
++			for (int i = 0; i < 12; ++i) {
++				if (active[i]) { continue; }
++
++				const double d = a[i][12] - x[i];
++
++				if (d > 1e-12 && a[i][12] > hi[i]) {
++					const double candidate = (hi[i] - x[i]) / d;
++
++					if (candidate < alpha) { alpha = candidate; hit = i; hit_side = 1; }
++
++				} else if (d < -1e-12 && a[i][12] < lo[i]) {
++					const double candidate = (lo[i] - x[i]) / d;
++
++					if (candidate < alpha) { alpha = candidate; hit = i; hit_side = -1; }
++				}
++			}
++
++			for (int i = 0; i < 12; ++i) { x[i] = fmax(lo[i], fmin(hi[i], x[i] + alpha * (a[i][12] - x[i]))); }
++
++			if (hit >= 0) { active[hit] = hit_side; continue; }
++
++			int release = -1; double worst = 1e-8;
++
++			for (int i = 0; i < 12; ++i) {
++				if (!active[i]) { continue; }
++
++				double gradient = -b[i];
++
++				for (int j = 0; j < 12; ++j) { gradient += h[i][j] * x[j]; }
++
++				const double violation = active[i] * gradient;
++
++				if (violation > worst) { worst = violation; release = i; }
++			}
++
++			if (release < 0) { return true; }
++
++			active[release] = 0;
++		}
++
++		return false;
++	}
++
++	bool solve(const Wrench &desired, float dt)
++	{
++		if (!desired.isAllFinite() || !PX4_ISFINITE(dt)) { return false; }
++
++		if (!initialized) {
++			state.zero();
++
++			for (int i = 0; i < 6; ++i) { state(i) = geometry.mass * 9.81f / 6.f; }
++
++			initialized = true;
++		}
++
++		State lower, upper, scale, nominal;
++
++		for (int i = 0; i < 12; ++i) {
++			if (i < 6) {
++				lower(i) = 0.f; upper(i) = geometry.max_thrust; scale(i) = geometry.max_thrust;
++				nominal(i) = math::constrain(desired(2) / 6.f, 0.f, geometry.max_thrust);
++
++			} else {
++				lower(i) = math::max(-geometry.tilt_limit, state(i) - geometry.tilt_rate * dt);
++				upper(i) = math::min(geometry.tilt_limit, state(i) + geometry.tilt_rate * dt);
++				scale(i) = 1.f;
++			}
++		}
++
++		State z = state;
++		const float weight[6] = {1.f, 1.f, 2.f, 3.f, 3.f, 2.f};
++
++		for (int iteration = 0; iteration < 3; ++iteration) {
++			const Wrench w = wrench(z);
++			matrix::Matrix<float, 6, 12> jacobian;
++			const auto motors = effectiveness(z);
++
++			for (int i = 0; i < 6; ++i) {
++				for (int j = 0; j < 6; ++j) { jacobian(i, j) = motors(i, j); }
++			}
++
++			for (int j = 6; j < 12; ++j) {
++				State plus = z, minus = z;
++				plus(j) += 1e-4f; minus(j) -= 1e-4f;
++				const Wrench column = (wrench(plus) - wrench(minus)) / 2e-4f;
++
++				for (int i = 0; i < 6; ++i) { jacobian(i, j) = column(i); }
++			}
++
++			double h[12][12] {}, b[12] {}, lo[12], hi[12], x[12];
++
++			for (int j = 0; j < 12; ++j) {
++				lo[j] = (lower(j) - z(j)) / scale(j); hi[j] = (upper(j) - z(j)) / scale(j);
++				b[j] = .0064 * double((nominal(j) - z(j)) / scale(j));
++
++				for (int k = 0; k < 12; ++k) {
++					h[j][k] = j == k ? .0064 : 0.;
++
++					for (int i = 0; i < 6; ++i) {
++						h[j][k] += double(weight[i] * jacobian(i, j) * scale(j)) * double(weight[i] * jacobian(i, k) * scale(k));
++					}
++				}
++
++				for (int i = 0; i < 6; ++i) { b[j] += double(weight[i] * jacobian(i, j) * scale(j)) * double(weight[i] * (desired(i) - w(i))); }
++			}
++
++			if (!bounded(h, b, lo, hi, x)) { return false; }
++
++			for (int i = 0; i < 12; ++i) { z(i) = math::constrain(z(i) + float(x[i]) * scale(i), lower(i), upper(i)); }
++		}
++
++		if (!z.isAllFinite()) { return false; }
++
++		state = z;
++		return true;
++	}
++};
+diff --git a/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.hpp b/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.hpp
+new file mode 100644
+index 0000000000..ac444283eb
+--- /dev/null
++++ b/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.hpp
+@@ -0,0 +1,50 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++#pragma once
++#include "ControlAllocation.hpp"
++#include "DragonflyAllocation.hpp"
++#include <drivers/drv_hrt.h>
++
++class ControlAllocationDragonfly : public ControlAllocation
++{
++public:
++	ControlAllocationDragonfly() { updateParameters(); }
++	void allocate() override;
++	void updateParameters() override;
++	matrix::Vector<float, NUM_AXES> getAllocatedControl() const override;
++private:
++	DragonflyAllocation _solver;
++	hrt_abstime _last_run{};
++	unsigned _failures{};
++};
+diff --git a/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.cpp b/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.cpp
+new file mode 100644
+index 0000000000..70aa8cbd32
+--- /dev/null
++++ b/src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.cpp
+@@ -0,0 +1,128 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++#include "ControlAllocationDragonfly.hpp"
++#include <lib/parameters/param.h>
++
++static float read_float(const char *name, float fallback)
++{
++	const param_t handle = param_find(name);
++	float value = fallback;
++
++	if (handle != PARAM_INVALID) { param_get(handle, &value); }
++
++	return PX4_ISFINITE(value) ? value : fallback;
++}
++
++void ControlAllocationDragonfly::updateParameters()
++{
++	auto &g = _solver.geometry;
++	g.mass = read_float("DF_MASS", g.mass);
++	g.radius = read_float("DF_RADIUS", g.radius);
++	g.spacing = read_float("DF_SPACING", g.spacing);
++	g.height = read_float("DF_HEIGHT", g.height);
++	g.hub_height = read_float("DF_HUB", g.hub_height);
++	g.max_thrust = read_float("DF_FMAX", g.max_thrust);
++	g.moment = read_float("DF_MOMENT", g.moment);
++	g.tilt_limit = read_float("DF_TILT", g.tilt_limit);
++	g.tilt_rate = read_float("DF_TILTRATE", g.tilt_rate);
++	g.accel_scale = read_float("DF_ACC", g.accel_scale);
++	g.rate_scale = read_float("DF_RATE", g.rate_scale);
++	g.com = matrix::Vector3f(read_float("DF_COM_X", 0.f), read_float("DF_COM_Y", 0.f), read_float("DF_COM_Z", 0.f));
++	g.inertia.zero();
++	g.inertia(0, 0) = read_float("DF_IXX", 1.f);
++	g.inertia(1, 1) = read_float("DF_IYY", 1.f);
++	g.inertia(2, 2) = read_float("DF_IZZ", 1.f);
++	g.inertia(0, 1) = g.inertia(1, 0) = read_float("DF_IXY", 0.f);
++	g.inertia(0, 2) = g.inertia(2, 0) = read_float("DF_IXZ", 0.f);
++	g.inertia(1, 2) = g.inertia(2, 1) = read_float("DF_IYZ", 0.f);
++}
++
++void ControlAllocationDragonfly::allocate()
++{
++	_prev_actuator_sp = _actuator_sp;
++	const hrt_abstime now = hrt_absolute_time();
++	const float dt = _last_run ? math::constrain((now - _last_run) * 1e-6f, .001f, .03f) : .004f;
++	_last_run = now;
++	const auto &g = _solver.geometry;
++	// PX4 messages are always FRD. The URDF allocation math is body FLU.
++	const matrix::Vector3f force(_control_sp(3)*g.mass * g.accel_scale,
++				     -_control_sp(4)*g.mass * g.accel_scale,
++				     -_control_sp(5)*g.mass * g.accel_scale);
++	const matrix::Vector3f angular(_control_sp(0), -_control_sp(1), -_control_sp(2));
++	const matrix::Vector3f torque = g.inertia * (angular * g.rate_scale) + g.com.cross(force);
++	DragonflyAllocation::Wrench demand;
++
++	for (int i = 0; i < 3; ++i) { demand(i) = force(i); demand(i + 3) = torque(i); }
++
++	if (!_solver.solve(demand, dt)) {
++		if (++_failures >= 3) { _actuator_sp.zero(); }
++
++		return;
++	}
++
++	_failures = 0;
++	_actuator_sp.zero();
++
++	for (int i = 0; i < 6; ++i) {
++		// Gazebo ESC consumes normalized angular speed when THR_MDL_FAC=0.
++		_actuator_sp(i) = sqrtf(math::constrain(_solver.state(i) / g.max_thrust, 0.f, 1.f));
++		_actuator_sp(i + 6) = _solver.state(i + 6) / g.tilt_limit;
++	}
++}
++
++matrix::Vector<float, ControlAllocation::NUM_AXES> ControlAllocationDragonfly::getAllocatedControl() const
++{
++	auto state = _solver.state;
++	const auto &g = _solver.geometry;
++
++	for (int i = 0; i < 6; ++i) {
++		state(i) = math::sq(math::constrain(_actuator_sp(i), 0.f, 1.f)) * g.max_thrust;
++		state(i + 6) = math::constrain(_actuator_sp(i + 6), -1.f, 1.f) * g.tilt_limit;
++	}
++
++	const auto w = _solver.wrench(state);
++	const matrix::Vector3f force(w(0), w(1), w(2));
++	const matrix::Vector3f torque = matrix::Vector3f(w(3), w(4), w(5)) - g.com.cross(force);
++	matrix::Matrix3f inverse;
++	matrix::Vector3f angular;
++
++	if (matrix::inv(g.inertia, inverse)) { angular = inverse * torque / g.rate_scale; }
++
++	matrix::Vector<float, NUM_AXES> control;
++	control(0) = angular(0); control(1) = -angular(1); control(2) = -angular(2);
++	control(3) = force(0) / (g.mass * g.accel_scale);
++	control(4) = -force(1) / (g.mass * g.accel_scale);
++	control(5) = -force(2) / (g.mass * g.accel_scale);
++	return control;
++}
+diff --git a/src/lib/control_allocation/control_allocation/ControlAllocation.hpp b/src/lib/control_allocation/control_allocation/ControlAllocation.hpp
+index a6e2e2b254..2cceded35c 100644
+--- a/src/lib/control_allocation/control_allocation/ControlAllocation.hpp
++++ b/src/lib/control_allocation/control_allocation/ControlAllocation.hpp
+@@ -142,7 +142,7 @@ public:
+ 	 *
+ 	 * @return Control vector
+ 	 */
+-	matrix::Vector<float, NUM_AXES> getAllocatedControl() const
++	virtual matrix::Vector<float, NUM_AXES> getAllocatedControl() const
+ 	{ return (_effectiveness * (_actuator_sp - _actuator_trim)).emult(_control_allocation_scale); }
+ 
+ 	/**
+diff --git a/src/lib/control_allocation/control_allocation/CMakeLists.txt b/src/lib/control_allocation/control_allocation/CMakeLists.txt
+index 4da638aac8..0a7404fa78 100644
+--- a/src/lib/control_allocation/control_allocation/CMakeLists.txt
++++ b/src/lib/control_allocation/control_allocation/CMakeLists.txt
+@@ -32,6 +32,7 @@
+ ############################################################################
+ 
+ px4_add_library(ControlAllocation
++	ControlAllocationDragonfly.cpp
+ 	ControlAllocation.cpp
+ 	ControlAllocation.hpp
+ 	ControlAllocationPseudoInverse.cpp
+diff --git a/src/lib/control_allocation/control_allocation/dragonfly_params.c b/src/lib/control_allocation/control_allocation/dragonfly_params.c
+new file mode 100644
+index 0000000000..997786b346
+--- /dev/null
++++ b/src/lib/control_allocation/control_allocation/dragonfly_params.c
+@@ -0,0 +1,149 @@
++// Parameter metadata is collected by the PX4 parameter generator.
++
++/**
++ * Dragonfly en (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_INT32(DF_EN, 0);
++
++/**
++ * Dragonfly mass (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_MASS, 4.628f);
++
++/**
++ * Dragonfly radius (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_RADIUS, 0.692820323f);
++
++/**
++ * Dragonfly spacing (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_SPACING, 0.36f);
++
++/**
++ * Dragonfly height (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_HEIGHT, 0.06f);
++
++/**
++ * Dragonfly hub (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_HUB, 0.038f);
++
++/**
++ * Dragonfly fmax (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_FMAX, 15.13356f);
++
++/**
++ * Dragonfly moment (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_MOMENT, 0.02f);
++
++/**
++ * Dragonfly tilt (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_TILT, 1.570796327f);
++
++/**
++ * Dragonfly tiltrate (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_TILTRATE, 0.5f);
++
++/**
++ * Dragonfly acc (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_ACC, 19.62f);
++
++/**
++ * Dragonfly rate (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_RATE, 26.6666667f);
++
++/**
++ * Dragonfly com_x (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_COM_X, 0.00951f);
++
++/**
++ * Dragonfly com_y (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_COM_Y, 0.0f);
++
++/**
++ * Dragonfly com_z (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_COM_Z, -0.10556f);
++
++/**
++ * Dragonfly ixx (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IXX, 1.0f);
++
++/**
++ * Dragonfly iyy (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IYY, 1.0f);
++
++/**
++ * Dragonfly izz (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IZZ, 1.0f);
++
++/**
++ * Dragonfly ixy (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IXY, 0.0f);
++
++/**
++ * Dragonfly ixz (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IXZ, 0.0f);
++
++/**
++ * Dragonfly iyz (SI, body FLU).
++ *
++ * @group Dragonfly Vector
++ */
++PARAM_DEFINE_FLOAT(DF_IYZ, 0.0f);
++
+diff --git a/src/lib/control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp b/src/lib/control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp
+index 0ddd4988f3..c635ea9608 100644
+--- a/src/lib/control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp
++++ b/src/lib/control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp
+@@ -51,6 +51,7 @@ enum class AllocationMethod {
+ 	PSEUDO_INVERSE = 0,
+ 	SEQUENTIAL_DESATURATION = 1,
+ 	AUTO = 2,
++	DRAGONFLY = 3,
+ };
+ 
+ enum class ActuatorType {
+diff --git a/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessDragonfly.hpp b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessDragonfly.hpp
+new file mode 100644
+index 0000000000..ad9aad73b4
+--- /dev/null
++++ b/src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessDragonfly.hpp
+@@ -0,0 +1,61 @@
++/****************************************************************************
++ *
++ *   Copyright (c) 2019 PX4 Development Team. All rights reserved.
++ *
++ * Redistribution and use in source and binary forms, with or without
++ * modification, are permitted provided that the following conditions
++ * are met:
++ *
++ * 1. Redistributions of source code must retain the above copyright
++ *    notice, this list of conditions and the following disclaimer.
++ * 2. Redistributions in binary form must reproduce the above copyright
++ *    notice, this list of conditions and the following disclaimer in
++ *    the documentation and/or other materials provided with the
++ *    distribution.
++ * 3. Neither the name PX4 nor the names of its contributors may be
++ *    used to endorse or promote products derived from this software
++ *    without specific prior written permission.
++ *
++ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ * FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ * COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS
++ * OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED
++ * AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ * POSSIBILITY OF SUCH DAMAGE.
++ *
++ ****************************************************************************/
++
++#pragma once
++#include "control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp"
++
++class ActuatorEffectivenessDragonfly : public ActuatorEffectiveness
++{
++public:
++	const char *name() const override { return "Dragonfly dual-axis tilt"; }
++	void getDesiredAllocationMethod(AllocationMethod out[MAX_NUM_MATRICES]) const override
++	{
++		out[0] = AllocationMethod::DRAGONFLY;
++	}
++	bool getEffectivenessMatrix(Configuration &configuration, EffectivenessUpdateReason reason) override
++	{
++		if (reason == EffectivenessUpdateReason::NO_EXTERNAL_UPDATE) { return false; }
++
++		// Register exactly six motors followed by six servos. Nonlinear
++		// allocation and achieved wrench are supplied by the dedicated class.
++		for (int i = 0; i < 6; ++i) {
++			configuration.addActuator(ActuatorType::MOTORS, matrix::Vector3f(), matrix::Vector3f(0.f, 0.f, -1.f));
++		}
++
++		for (int i = 0; i < 6; ++i) {
++			configuration.addActuator(ActuatorType::SERVOS, matrix::Vector3f(), matrix::Vector3f());
++		}
++
++		return true;
++	}
++};
+diff --git a/src/modules/control_allocator/ControlAllocator.cpp b/src/modules/control_allocator/ControlAllocator.cpp
+index a7e43a64e3..0f48afe410 100644
+--- a/src/modules/control_allocator/ControlAllocator.cpp
++++ b/src/modules/control_allocator/ControlAllocator.cpp
+@@ -40,6 +40,8 @@
+  */
+ 
+ #include "ControlAllocator.hpp"
++#include <ControlAllocationDragonfly.hpp>
++#include "VehicleActuatorEffectiveness/ActuatorEffectivenessDragonfly.hpp"
+ 
+ #include <drivers/drv_hrt.h>
+ #include <circuit_breaker/circuit_breaker.h>
+@@ -174,6 +176,10 @@ ControlAllocator::update_allocation_method(bool force)
+ 			}
+ 
+ 			switch (method) {
++			case AllocationMethod::DRAGONFLY:
++				_control_allocation[i] = new ControlAllocationDragonfly();
++				break;
++
+ 			case AllocationMethod::PSEUDO_INVERSE:
+ 				_control_allocation[i] = new ControlAllocationPseudoInverse();
+ 				break;
+@@ -249,6 +255,10 @@ ControlAllocator::update_effectiveness_source()
+ 			tmp = new ActuatorEffectivenessMCTilt(this);
+ 			break;
+ 
++		case EffectivenessSource::DRAGONFLY:
++			tmp = new ActuatorEffectivenessDragonfly();
++			break;
++
+ 		case EffectivenessSource::CUSTOM:
+ 			tmp = new ActuatorEffectivenessCustom(this);
+ 			break;
+@@ -792,6 +802,10 @@ int ControlAllocator::print_status()
+ 		PX4_INFO("Method: None");
+ 		break;
+ 
++	case AllocationMethod::DRAGONFLY:
++		PX4_INFO("Method: Dragonfly nonlinear bounded allocation");
++		break;
++
+ 	case AllocationMethod::PSEUDO_INVERSE:
+ 		PX4_INFO("Method: Pseudo-inverse");
+ 		break;
+diff --git a/src/modules/control_allocator/ControlAllocator.hpp b/src/modules/control_allocator/ControlAllocator.hpp
+index ce92c5036b..8b911ad269 100644
+--- a/src/modules/control_allocator/ControlAllocator.hpp
++++ b/src/modules/control_allocator/ControlAllocator.hpp
+@@ -160,6 +160,7 @@ private:
+ 		HELICOPTER_COAXIAL = 12,
+ 		SPACECRAFT_2D = 13,
+ 		SPACECRAFT_3D = 14,
++		DRAGONFLY = 16,
+ 	};
+ 
+ 	enum class FailureMode {
+diff --git a/src/modules/control_allocator/module.yaml b/src/modules/control_allocator/module.yaml
+index 82d3fb2e12..a823ab80d8 100644
+--- a/src/modules/control_allocator/module.yaml
++++ b/src/modules/control_allocator/module.yaml
+@@ -33,6 +33,7 @@ parameters:
+                 13: Rover (Mecanum)
+                 14: Spacecraft 2D
+                 15: Spacecraft 3D
++                16: Dragonfly dual-axis tilt
+             default: 0
+ 
+         CA_METHOD:
+@@ -46,6 +47,7 @@ parameters:
+                 0: Pseudo-inverse with output clipping
+                 1: Pseudo-inverse with sequential desaturation technique
+                 2: Automatic
++                3: Dragonfly nonlinear bounded allocation
+             default: 2
+ 
+         # Motor parameters
+diff --git a/src/modules/mc_pos_control/PositionControl/PositionControl.hpp b/src/modules/mc_pos_control/PositionControl/PositionControl.hpp
+index fb467f7419..9f92af14ef 100644
+--- a/src/modules/mc_pos_control/PositionControl/PositionControl.hpp
++++ b/src/modules/mc_pos_control/PositionControl/PositionControl.hpp
+@@ -76,6 +76,14 @@ class PositionControl
+ {
+ public:
+ 
++	void setVectorMode(bool enabled, float acceleration_scale) { _vector_mode = enabled; _vector_scale = math::max(acceleration_scale, 10.f); }
++	void setBodyAttitude(const matrix::Quatf &q)
++	{
++		_attitude_valid = q.isAllFinite() && q.norm() > .5f;
++
++		if (_attitude_valid) { _body_attitude = q.normalized(); }
++	}
++	const matrix::Vector3f &getThrustNED() const { return _thr_sp; }
+ 	PositionControl() = default;
+ 	~PositionControl() = default;
+ 
+@@ -191,6 +199,10 @@ public:
+ 	static const trajectory_setpoint_s empty_trajectory_setpoint;
+ 
+ private:
++	bool _vector_mode{false};
++	float _vector_scale{19.62f};
++	bool _attitude_valid{true};
++	matrix::Quatf _body_attitude{1.f, 0.f, 0.f, 0.f};
+ 	// The range limits of the hover thrust configuration/estimate
+ 	static constexpr float HOVER_THRUST_MIN = 0.05f;
+ 	static constexpr float HOVER_THRUST_MAX = 0.9f;
+diff --git a/src/modules/mc_pos_control/PositionControl/PositionControl.cpp b/src/modules/mc_pos_control/PositionControl/PositionControl.cpp
+index 72ae5a4a31..abbd9f0bd3 100644
+--- a/src/modules/mc_pos_control/PositionControl/PositionControl.cpp
++++ b/src/modules/mc_pos_control/PositionControl/PositionControl.cpp
+@@ -81,6 +81,8 @@ void PositionControl::updateHoverThrust(const float hover_thrust_new)
+ 	// T' = T => a_sp' * Th' / g - Th' = a_sp * Th / g - Th
+ 	// so a_sp' = (a_sp - g) * Th / Th' + g
+ 	// we can then add a_sp' - a_sp to the current integrator to absorb the effect of changing Th by Th'
++	if (_vector_mode) { return; } // Fixed physical thrust scale; HTE must not alter the integrator.
++
+ 	const float previous_hover_thrust = _hover_thrust;
+ 	setHoverThrust(hover_thrust_new);
+ 
+@@ -107,7 +109,7 @@ void PositionControl::setInputSetpoint(const trajectory_setpoint_s &setpoint)
+ 
+ bool PositionControl::update(const float dt)
+ {
+-	bool valid = _inputValid();
++	bool valid = _inputValid() && (!_vector_mode || _attitude_valid);
+ 
+ 	if (valid) {
+ 		_positionControl();
+@@ -184,7 +186,8 @@ void PositionControl::_velocityControl(const float dt)
+ 
+ 	// Use tracking Anti-Windup for horizontal direction: during saturation, the integrator is used to unsaturate the output
+ 	// see Anti-Reset Windup for PID controllers, L.Rundqwist, 1990
+-	const Vector2f acc_sp_xy_produced = Vector2f(_thr_sp) * (CONSTANTS_ONE_G / _hover_thrust);
++	const Vector2f acc_sp_xy_produced = Vector2f(_thr_sp) * (_vector_mode ? _vector_scale : CONSTANTS_ONE_G /
++					    _hover_thrust);
+ 
+ 	// The produced acceleration can be greater or smaller than the desired acceleration due to the saturations and the actual vertical thrust (computed independently).
+ 	// The ARW loop needs to run if the signal is saturated only.
+@@ -203,6 +206,18 @@ void PositionControl::_velocityControl(const float dt)
+ 
+ void PositionControl::_accelerationControl()
+ {
++	if (_vector_mode) {
++		Vector3f acceleration = _acc_sp;
++		const float norm = acceleration.xy().norm();
++
++		if (norm > 8.f) { acceleration.xy() = Vector2f(acceleration.xy()) * (8.f / norm); }
++
++		acceleration(2) -= CONSTANTS_ONE_G;
++		_thr_sp = acceleration / _vector_scale;
++		_thr_sp(2) = math::min(_thr_sp(2), -_lim_thr_min);
++		return;
++	}
++
+ 	// Assume standard acceleration due to gravity in vertical direction for attitude generation
+ 	float z_specific_force = -CONSTANTS_ONE_G;
+ 
+@@ -265,6 +280,14 @@ void PositionControl::getLocalPositionSetpoint(vehicle_local_position_setpoint_s
+ 
+ void PositionControl::getAttitudeSetpoint(vehicle_attitude_setpoint_s &attitude_setpoint) const
+ {
+-	ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
++	if (_vector_mode) {
++		Quatf(Eulerf(0.f, 0.f, _yaw_sp)).copyTo(attitude_setpoint.q_d);
++		// thrust_body is current body FRD, never NED in a body field.
++		(Dcmf(_body_attitude).transpose() * _thr_sp).copyTo(attitude_setpoint.thrust_body);
++
++	} else {
++		ControlMath::thrustToAttitude(_thr_sp, _yaw_sp, attitude_setpoint);
++	}
++
+ 	attitude_setpoint.yaw_sp_move_rate = _yawspeed_sp;
+ }
+diff --git a/src/modules/mc_pos_control/MulticopterPositionControl.hpp b/src/modules/mc_pos_control/MulticopterPositionControl.hpp
+index 5ae11224cf..5b1b86ace7 100644
+--- a/src/modules/mc_pos_control/MulticopterPositionControl.hpp
++++ b/src/modules/mc_pos_control/MulticopterPositionControl.hpp
+@@ -62,6 +62,7 @@
+ #include <uORB/topics/parameter_update.h>
+ #include <uORB/topics/trajectory_setpoint.h>
+ #include <uORB/topics/vehicle_attitude_setpoint.h>
++#include <uORB/topics/vehicle_attitude.h>
+ #include <uORB/topics/vehicle_constraints.h>
+ #include <uORB/topics/vehicle_control_mode.h>
+ #include <uORB/topics/vehicle_land_detected.h>
+@@ -101,6 +102,8 @@ private:
+ 
+ 	uORB::SubscriptionCallbackWorkItem _local_pos_sub{this, ORB_ID(vehicle_local_position)};	/**< vehicle local position */
+ 
++	uORB::Subscription _body_attitude_sub{ORB_ID(vehicle_attitude)};
++
+ 	uORB::SubscriptionInterval _parameter_update_sub{ORB_ID(parameter_update), 1_s};
+ 
+ 	uORB::Subscription _hover_thrust_estimate_sub{ORB_ID(hover_thrust_estimate)};
+@@ -132,6 +135,8 @@ private:
+ 	};
+ 
+ 	DEFINE_PARAMETERS(
++		(ParamBool<px4::params::DF_EN>) _param_df_en,
++		(ParamFloat<px4::params::DF_ACC>) _param_df_acc,
+ 		// Position Control
+ 		(ParamFloat<px4::params::MPC_XY_P>)         _param_mpc_xy_p,
+ 		(ParamFloat<px4::params::MPC_Z_P>)          _param_mpc_z_p,
+diff --git a/src/modules/mc_pos_control/MulticopterPositionControl.cpp b/src/modules/mc_pos_control/MulticopterPositionControl.cpp
+index ff2a9223bb..5a2d0c10c7 100644
+--- a/src/modules/mc_pos_control/MulticopterPositionControl.cpp
++++ b/src/modules/mc_pos_control/MulticopterPositionControl.cpp
+@@ -193,6 +193,7 @@ void MulticopterPositionControl::parameters_update(bool force)
+ 					    "Land tilt limit has been constrained by maximum tilt", _param_mpc_tiltmax_air.get());
+ 		}
+ 
++		_control.setVectorMode(_param_df_en.get(), _param_df_acc.get());
+ 		_control.setPositionGains(Vector3f(_param_mpc_xy_p.get(), _param_mpc_xy_p.get(), _param_mpc_z_p.get()));
+ 		_control.setVelocityGains(
+ 			Vector3f(_param_mpc_xy_vel_p_acc.get(), _param_mpc_xy_vel_p_acc.get(), _param_mpc_z_vel_p_acc.get()),
+@@ -414,7 +415,7 @@ void MulticopterPositionControl::Run()
+ 
+ 		_vehicle_land_detected_sub.update(&_vehicle_land_detected);
+ 
+-		if (_param_mpc_use_hte.get()) {
++		if (_param_mpc_use_hte.get() && !_param_df_en.get()) {
+ 			hover_thrust_estimate_s hte;
+ 
+ 			if (_hover_thrust_estimate_sub.update(&hte)) {
+@@ -563,6 +564,12 @@ void MulticopterPositionControl::Run()
+ 				_control.resetIntegralXY();
+ 			}
+ 
++			if (_param_df_en.get()) {
++				vehicle_attitude_s attitude{};
++				_body_attitude_sub.copy(&attitude);
++				_control.setBodyAttitude(matrix::Quatf(attitude.q));
++			}
++
+ 			_control.setState(states);
+ 
+ 			const hrt_abstime now = hrt_absolute_time();
+diff --git a/src/modules/uxrce_dds_client/dds_topics.yaml b/src/modules/uxrce_dds_client/dds_topics.yaml
+index 24c30d8850..d237207dfa 100644
+--- a/src/modules/uxrce_dds_client/dds_topics.yaml
++++ b/src/modules/uxrce_dds_client/dds_topics.yaml
+@@ -5,6 +5,24 @@
+ #####
+ publications:
+ 
++  - topic: /fmu/out/actuator_motors
++    type: px4_msgs::msg::ActuatorMotors
++
++  - topic: /fmu/out/actuator_servos
++    type: px4_msgs::msg::ActuatorServos
++
++  - topic: /fmu/out/control_allocator_status
++    type: px4_msgs::msg::ControlAllocatorStatus
++
++  - topic: /fmu/out/vehicle_thrust_setpoint
++    type: px4_msgs::msg::VehicleThrustSetpoint
++
++  - topic: /fmu/out/vehicle_torque_setpoint
++    type: px4_msgs::msg::VehicleTorqueSetpoint
++
++  - topic: /fmu/out/vehicle_local_position_setpoint
++    type: px4_msgs::msg::VehicleLocalPositionSetpoint
++
+   - topic: /fmu/out/register_ext_component_reply
+     type: px4_msgs::msg::RegisterExtComponentReply
+ 
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/40160_gz_dragonfly b/ROMFS/px4fmu_common/init.d-posix/airframes/40160_gz_dragonfly
+new file mode 100644
+index 0000000000..5e20909d32
+--- /dev/null
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/40160_gz_dragonfly
+@@ -0,0 +1,65 @@
++#!/bin/sh
++#
++# @name Gazebo Dragonfly vector hexarotor
++# @type Hexarotor
++#
++# The Dragonfly launcher supplies geometry, mass, CoM and inertia from its URDF.
++# Gazebo is started externally using the generated Dragonfly world.
++
++. ${R}etc/init.d/rc.mc_defaults
++
++PX4_SIMULATOR=${PX4_SIMULATOR:=gz}
++PX4_GZ_WORLD=${PX4_GZ_WORLD:=default}
++PX4_SIM_MODEL=${PX4_SIM_MODEL:=dragonfly}
++
++param set-default SIM_GZ_EN 1
++param set-default DF_EN 1
++param set-default CA_AIRFRAME 16
++param set-default CA_METHOD 3
++param set-default CA_ROTOR_COUNT 6
++param set-default MPC_USE_HTE 0
++param set-default MPC_THR_HOVER 0.5
++param set-default MPC_THR_MIN 0.01
++param set-default MPC_THR_MAX 1.0
++param set-default THR_MDL_FAC 0
++
++param set-default SIM_GZ_EC_FUNC1 101
++param set-default SIM_GZ_EC_FUNC2 102
++param set-default SIM_GZ_EC_FUNC3 103
++param set-default SIM_GZ_EC_FUNC4 104
++param set-default SIM_GZ_EC_FUNC5 105
++param set-default SIM_GZ_EC_FUNC6 106
++
++param set-default SIM_GZ_EC_MIN1 0
++param set-default SIM_GZ_EC_MIN2 0
++param set-default SIM_GZ_EC_MIN3 0
++param set-default SIM_GZ_EC_MIN4 0
++param set-default SIM_GZ_EC_MIN5 0
++param set-default SIM_GZ_EC_MIN6 0
++
++param set-default SIM_GZ_EC_MAX1 1000
++param set-default SIM_GZ_EC_MAX2 1000
++param set-default SIM_GZ_EC_MAX3 1000
++param set-default SIM_GZ_EC_MAX4 1000
++param set-default SIM_GZ_EC_MAX5 1000
++param set-default SIM_GZ_EC_MAX6 1000
++
++param set-default SIM_GZ_SV_FUNC1 201
++param set-default SIM_GZ_SV_FUNC2 202
++param set-default SIM_GZ_SV_FUNC3 203
++param set-default SIM_GZ_SV_FUNC4 204
++param set-default SIM_GZ_SV_FUNC5 205
++param set-default SIM_GZ_SV_FUNC6 206
++
++param set-default SIM_GZ_SV_MINA1 -90
++param set-default SIM_GZ_SV_MINA2 -90
++param set-default SIM_GZ_SV_MINA3 -90
++param set-default SIM_GZ_SV_MINA4 -90
++param set-default SIM_GZ_SV_MINA5 -90
++param set-default SIM_GZ_SV_MINA6 -90
++param set-default SIM_GZ_SV_MAXA1 90
++param set-default SIM_GZ_SV_MAXA2 90
++param set-default SIM_GZ_SV_MAXA3 90
++param set-default SIM_GZ_SV_MAXA4 90
++param set-default SIM_GZ_SV_MAXA5 90
++param set-default SIM_GZ_SV_MAXA6 90
+diff --git a/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt b/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
+index b4e107799f..9143d4c38b 100644
+--- a/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
++++ b/ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt
+@@ -73,6 +73,7 @@ px4_add_romfs_files(
+ 	3011_jsbsim_hexarotor_x
+ 
+ 	4001_gz_x500
++	40160_gz_dragonfly
+ 	4002_gz_x500_depth
+ 	4003_gz_rc_cessna
+ 	4004_gz_standard_vtol

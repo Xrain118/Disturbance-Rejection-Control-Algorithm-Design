@@ -1,0 +1,65 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <material name="carbon"><color rgba="0.065 0.075 0.085 1"/></material>
+  <material name="metal"><color rgba="0.34 0.38 0.42 1"/></material>
+  <material name="servo"><color rgba="0.14 0.16 0.19 1"/></material>
+  <material name="red"><color rgba="0.65 0.07 0.04 1"/></material>
+
+  <xacro:macro name="box_inertial" params="mass x y z xyz:='0 0 0' rpy:='0 0 0'">
+    <inertial>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(y*y+z*z)/12}" ixy="0" ixz="0"
+               iyy="${mass*(x*x+z*z)/12}" iyz="0" izz="${mass*(x*x+y*y)/12}"/>
+    </inertial>
+  </xacro:macro>
+  <xacro:macro name="cylinder_inertial" params="mass radius length xyz:='0 0 0' rpy:='0 0 0'">
+    <inertial>
+      <origin xyz="${xyz}" rpy="${rpy}"/>
+      <mass value="${mass}"/>
+      <inertia ixx="${mass*(3*radius*radius+length*length)/12}" ixy="0" ixz="0"
+               iyy="${mass*(3*radius*radius+length*length)/12}" iyz="0" izz="${mass*radius*radius/2}"/>
+    </inertial>
+  </xacro:macro>
+  <xacro:macro name="box_shape" params="x y z xyz:='0 0 0' rpy:='0 0 0' material:=carbon">
+    <visual><origin xyz="${xyz}" rpy="${rpy}"/><geometry><box size="${x} ${y} ${z}"/></geometry><material name="${material}"/></visual>
+    <collision><origin xyz="${xyz}" rpy="${rpy}"/><geometry><box size="${x} ${y} ${z}"/></geometry></collision>
+  </xacro:macro>
+  <xacro:macro name="cylinder_shape" params="radius length xyz:='0 0 0' rpy:='0 0 0' material:=carbon">
+    <visual><origin xyz="${xyz}" rpy="${rpy}"/><geometry><cylinder radius="${radius}" length="${length}"/></geometry><material name="${material}"/></visual>
+    <collision><origin xyz="${xyz}" rpy="${rpy}"/><geometry><cylinder radius="${radius}" length="${length}"/></geometry></collision>
+  </xacro:macro>
+  <xacro:macro name="gazebo_color" params="link color:=DarkGrey">
+    <!-- Harmonic reads the URDF visual material above directly.  Classic
+         Gazebo/* material scripts produce a migration warning in gz-sim. -->
+  </xacro:macro>
+  <xacro:macro name="fixed_box" params="name parent x y z xyz rpy:='0 0 0' mass material:=carbon color:=DarkGrey">
+    <joint name="${name}_joint" type="fixed"><parent link="${parent}"/><child link="${name}"/><origin xyz="${xyz}" rpy="${rpy}"/></joint>
+    <link name="${name}">
+      <xacro:box_shape x="${x}" y="${y}" z="${z}" material="${material}"/>
+      <xacro:box_inertial mass="${mass}" x="${x}" y="${y}" z="${z}"/>
+    </link>
+    <xacro:gazebo_color link="${name}" color="${color}"/>
+  </xacro:macro>
+  <!-- A cylinder centred between two endpoints. Rotation is applied to both
+       its geometry and its inertial frame through the fixed joint. -->
+  <xacro:macro name="tube_between" params="name parent ax ay az bx by bz radius mass">
+    <xacro:property name="dx" value="${bx-ax}"/><xacro:property name="dy" value="${by-ay}"/><xacro:property name="dz" value="${bz-az}"/>
+    <xacro:property name="length" value="${sqrt(dx*dx+dy*dy+dz*dz)}"/>
+    <joint name="${name}_joint" type="fixed">
+      <parent link="${parent}"/><child link="${name}"/>
+      <origin xyz="${(ax+bx)/2} ${(ay+by)/2} ${(az+bz)/2}" rpy="0 ${atan2(sqrt(dx*dx+dy*dy),dz)} ${atan2(dy,dx)}"/>
+    </joint>
+    <link name="${name}">
+      <xacro:cylinder_shape radius="${radius}" length="${length}"/>
+      <xacro:cylinder_inertial mass="${mass}" radius="${radius}" length="${length}"/>
+    </link>
+    <xacro:gazebo_color link="${name}"/>
+  </xacro:macro>
+  <xacro:macro name="controlled_joint" params="name lower:=${-sim.tilt_joint_limit} upper:=${sim.tilt_joint_limit}">
+    <joint name="${name}">
+      <command_interface name="position"><param name="min">${lower}</param><param name="max">${upper}</param></command_interface>
+      <state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+</robot>

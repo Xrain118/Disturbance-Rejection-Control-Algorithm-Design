@@ -1,0 +1,87 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<root version="3.17.2">
+ <tabbed_widget parent="main_window" name="Main Window">
+  <Tab containers="1" tab_name="Center X">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="x-t actual / reference">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="0.30" bottom="-0.30" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/truth/pose/pose/position/x" color="#1f77b4"/>
+     <curve name="/dragonfly/reference_pose/pose/position/x" color="#d62728"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Center Y">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="y-t actual / reference">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="0.30" bottom="-0.30" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/truth/pose/pose/position/y" color="#2ca02c"/>
+     <curve name="/dragonfly/reference_pose/pose/position/y" color="#d62728"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Center Z">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="z-t actual / reference">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="1.85" bottom="1.35" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/truth/pose/pose/position/z" color="#9467bd"/>
+     <curve name="/dragonfly/reference_pose/pose/position/z" color="#d62728"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Position error XYZ">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="Position error xyz (m)">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="0.15" bottom="-0.15" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/position_error/vector/x" color="#1f77b4"/>
+     <curve name="/dragonfly/position_error/vector/y" color="#ff7f0e"/>
+     <curve name="/dragonfly/position_error/vector/z" color="#2ca02c"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Position error norm">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="Position error norm (m)">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="0.20" bottom="0" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/position_error_norm/data" color="#d62728"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Attitude error">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="Attitude error RPY and norm (rad)">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="0.10" bottom="-0.10" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/attitude_error/vector/x" color="#1f77b4"/>
+     <curve name="/dragonfly/attitude_error/vector/y" color="#ff7f0e"/>
+     <curve name="/dragonfly/attitude_error/vector/z" color="#2ca02c"/>
+     <curve name="/dragonfly/attitude_error_norm/data" color="#d62728"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <Tab containers="1" tab_name="Arm state">
+   <Container><DockSplitter orientation="-" sizes="1" count="1"><DockArea name="Arm active and keyboard ready">
+    <plot flip_y="false" mode="TimeSeries" flip_x="false" style="Lines">
+     <range top="1.10" bottom="-0.10" right="60" left="0"/><limitY/>
+     <curve name="/dragonfly/arm_active/data" color="#9467bd"/>
+     <curve name="/dragonfly/ready/data" color="#17becf"/>
+    </plot>
+   </DockArea></DockSplitter></Container>
+  </Tab>
+  <currentTabIndex index="0"/>
+ </tabbed_widget>
+ <use_relative_time_offset enabled="1"/>
+ <streaming_buffer_size value="300"/>
+ <Plugins>
+  <plugin ID="ROS2 Topic Subscriber">
+   <use_header_stamp value="false"/>
+   <discard_large_arrays value="true"/>
+   <max_array_size value="100"/>
+   <boolean_strings_to_number value="true"/>
+   <remove_suffix_from_strings value="true"/>
+   <selected_topics value="/dragonfly/truth;/dragonfly/reference_pose;/dragonfly/position_error;/dragonfly/position_error_norm;/dragonfly/attitude_error;/dragonfly/attitude_error_norm;/dragonfly/arm_active;/dragonfly/ready"/>
+  </plugin>
+ </Plugins>
+ <previouslyLoaded_Datafiles/>
+ <previouslyLoaded_Streamer name="ROS2 Topic Subscriber"/>
+ <customMathEquations/>
+ <snippets/>
+</root>

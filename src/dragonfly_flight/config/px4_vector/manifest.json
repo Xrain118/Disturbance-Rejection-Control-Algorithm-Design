@@ -1,0 +1,42 @@
+[
+  {
+    "source": "位置环 未启用HTE 直接g补偿用Amax假归一化/PositionControl.cpp",
+    "destination": "src/modules/mc_pos_control/PositionControl/PositionControl.cpp",
+    "source_sha256": "e77454b097b3ead58a9cc370371c9741f7f0d1f84549f36b36bf29760a04c222",
+    "before_sha256": "6c2eb1132c41b9cb8c87a1def69278327d45117553e88b2ece6944f3d5e96f08",
+    "integrated_sha256": "b8a3c21679fae5f378e2d4bac0678aeff80b417952e4f7eca606ca5adfb2bd0d",
+    "changed_from_px4": true
+  },
+  {
+    "source": "位置环 未启用HTE 直接g补偿用Amax假归一化/PositionControl.hpp",
+    "destination": "src/modules/mc_pos_control/PositionControl/PositionControl.hpp",
+    "source_sha256": "79f03803e8d14c1eccd537a2b87c54f8b7faff7c61e11688d5842985e954dfa0",
+    "before_sha256": "87307a8715361b34aa0d54800645ac6edbe726ae92dbe292030543daaa1d8fe3",
+    "integrated_sha256": "029a6edbff66130d778f5e499ce21ceaf32cc5334082970c1944ed4cdbedf11d",
+    "changed_from_px4": true
+  },
+  {
+    "source": "分配器 无归一化 标准量纲版本 且是三元矢量构型/ControlAllocationSequentialDesaturation.cpp",
+    "destination": "src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp",
+    "source_sha256": "cdea39dc8101d1121e66386be6da6dd5d93aaa082b5f51c8497e4fa0d9d9dad9",
+    "before_sha256": "07e60bc11a9948d41c99950fd99fff06368bb6203f05b79d64386a0a04351d7c",
+    "integrated_sha256": "924f55ca92ffdb1ced4aa09d8777d0f7fafb5b7fefa62248266e9f5816192eaa",
+    "changed_from_px4": true
+  },
+  {
+    "source": "HTE估计 未启用 存在frd-ned/MulticopterHoverThrustEstimator.cpp",
+    "destination": "src/modules/mc_hover_thrust_estimator/MulticopterHoverThrustEstimator.cpp",
+    "source_sha256": "c8a6b0d8cd078222734e86306df04431c81df16efa58f8670193dd32ee8906e4",
+    "before_sha256": "c8a6b0d8cd078222734e86306df04431c81df16efa58f8670193dd32ee8906e4",
+    "integrated_sha256": "c8a6b0d8cd078222734e86306df04431c81df16efa58f8670193dd32ee8906e4",
+    "changed_from_px4": false
+  },
+  {
+    "source": "HTE估计 未启用 存在frd-ned/MulticopterHoverThrustEstimator.hpp",
+    "destination": "src/modules/mc_hover_thrust_estimator/MulticopterHoverThrustEstimator.hpp",
+    "source_sha256": "b0b9eb9fbc701cc207279c7b402f835f0266285d14945d101d9a23b326b7b79b",
+    "before_sha256": "b0b9eb9fbc701cc207279c7b402f835f0266285d14945d101d9a23b326b7b79b",
+    "integrated_sha256": "b0b9eb9fbc701cc207279c7b402f835f0266285d14945d101d9a23b326b7b79b",
+    "changed_from_px4": false
+  }
+]

@@ -1,0 +1,26 @@
+dual_arm_serial:
+  ros__parameters:
+    # Replace these two paths; use /dev/serial/by-id on the companion computer.
+    left.port: /dev/serial/by-id/REPLACE_LEFT_ESP32
+    right.port: /dev/serial/by-id/REPLACE_RIGHT_ESP32
+    left.device_id: ""
+    right.device_id: ""
+    left.protocol: v1
+    right.protocol: v1
+    # 0 selects 921600 for v1 or 115200 for explicit legacy mode.
+    left.baud: 0
+    right.baud: 0
+    left.position_sign: [1.0, 1.0, 1.0, 1.0, 1.0]
+    right.position_sign: [1.0, 1.0, 1.0, 1.0, 1.0]
+    left.position_offset: [0.0, 0.0, 0.0, 0.0, 0.0]
+    right.position_offset: [0.0, 0.0, 0.0, 0.0, 0.0]
+    # Physical servo directions in the joint coordinate system, IDs 11..17.
+    left.torque_sign: [-1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0]
+    right.torque_sign: [-1.0, 1.0, -1.0, 1.0, 1.0, -1.0, 1.0]
+    # Only set after confirming each servo's phase/speed-unit setting.
+    left.speed_rad_s_per_raw: 0.0
+    right.speed_rad_s_per_raw: 0.0
+    stale_timeout: 0.5
+    reconnect_interval: 2.0
+    filter_alpha: 0.0
+    record_path: ""

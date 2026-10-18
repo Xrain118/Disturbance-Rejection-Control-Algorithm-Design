@@ -1,0 +1,6 @@
+# Reproduce with these local source revisions; do not upgrade independently.
+px4: v1.16.2
+micro_xrce_dds_agent: v2.4.3
+px4_msgs: 392e831c1f659429ca83902e66820d7094591410
+ros: humble
+gazebo_sim: 8.15.0

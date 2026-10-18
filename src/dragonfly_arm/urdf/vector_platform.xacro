@@ -1,0 +1,99 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:macro name="propeller_blade" params="angle">
+    <visual>
+      <origin xyz="${meas.propeller_radius/2*cos(angle)} ${meas.propeller_radius/2*sin(angle)} 0" rpy="0 0 ${angle}"/>
+      <geometry><box size="${meas.propeller_radius} ${est.blade_width} ${est.blade_thickness}"/></geometry><material name="carbon"/>
+    </visual>
+  </xacro:macro>
+  <xacro:macro name="motor_and_propeller" params="unit suffix side">
+    <joint name="${unit}_motor_${suffix}_joint" type="fixed">
+      <parent link="${unit}_carrier_link"/><child link="${unit}_motor_${suffix}_link"/>
+      <origin xyz="0 ${side*meas.motor_spacing/2} ${est.motor_center_height}"/>
+    </joint>
+    <link name="${unit}_motor_${suffix}_link">
+      <xacro:cylinder_shape radius="${est.motor_radius}" length="${est.motor_height}" material="metal"/>
+      <xacro:cylinder_shape radius="0.006" length="${est.motor_center_height-est.motor_height/2-0.003}" xyz="0 0 ${-(est.motor_center_height+est.motor_height/2-0.003)/2}" material="metal"/>
+      <xacro:cylinder_shape radius="0.004" length="0.006" xyz="0 0 ${est.motor_height/2+0.001}" material="metal"/>
+      <xacro:cylinder_inertial mass="${sim.motor_mass}" radius="${est.motor_radius}" length="${est.motor_height}"/>
+    </link>
+    <joint name="${unit}_rotor_${suffix}_joint" type="fixed">
+      <parent link="${unit}_motor_${suffix}_link"/><child link="${unit}_rotor_${suffix}_link"/>
+      <origin xyz="0 0 ${est.motor_height/2+0.003}"/>
+    </joint>
+    <!-- This frame's +Z is the nominal positive thrust direction. Fixed
+         rotor joint has no spin, thrust, reaction torque or flight physics yet. -->
+    <link name="${unit}_rotor_${suffix}_link">
+      <xacro:propeller_blade angle="0"/><xacro:propeller_blade angle="${2*pi/3}"/><xacro:propeller_blade angle="${4*pi/3}"/>
+      <collision><geometry><cylinder radius="${meas.propeller_radius}" length="${est.blade_thickness}"/></geometry></collision>
+      <xacro:cylinder_inertial mass="${sim.propeller_mass}" radius="${meas.propeller_radius}" length="${est.blade_thickness}"/>
+    </link>
+    <xacro:gazebo_color link="${unit}_motor_${suffix}_link" color="Grey"/>
+    <xacro:gazebo_color link="${unit}_rotor_${suffix}_link"/>
+  </xacro:macro>
+
+  <xacro:macro name="vector_unit" params="name yaw">
+    <!-- Provisional kinematics Rz(yaw) Rx(outer) Ry(inner).
+         Both pivots intersect; outer is radial, inner tangential at zero. -->
+    <joint name="${name}_mount_joint" type="fixed">
+      <parent link="uav_base_link"/><child link="${name}_mount_link"/>
+      <origin xyz="${radius*cos(yaw)} ${radius*sin(yaw)} ${est.unit_height}" rpy="0 0 ${yaw}"/>
+    </joint>
+    <link name="${name}_mount_link">
+      <xacro:box_shape x="0.05" y="0.065" z="${est.unit_height-0.024}" xyz="-0.025 0 ${-(est.unit_height+0.024)/2}"/>
+      <xacro:box_shape x="0.10" y="0.09" z="0.004" xyz="-0.04 0 -0.027"/>
+      <xacro:box_shape x="0.04" y="0.03" z="0.04" xyz="-0.043 0 0" material="red"/>
+      <xacro:box_inertial mass="${sim.mount_mass}" x="0.10" y="0.09" z="${est.unit_height+0.02}" xyz="-0.04 0 ${(0.02-est.unit_height)/2}"/>
+    </link>
+    <joint name="${name}_outer_joint" type="revolute">
+      <parent link="${name}_mount_link"/><child link="${name}_outer_link"/>
+      <axis xyz="1 0 0"/><limit lower="${-sim.tilt_joint_limit}" upper="${sim.tilt_joint_limit}" effort="${sim.tilt_effort}" velocity="${sim.tilt_velocity}"/>
+      <dynamics damping="0.1" friction="0.01"/>
+    </joint>
+    <link name="${name}_outer_link">
+      <xacro:cylinder_shape radius="0.012" length="0.045" rpy="0 ${pi/2} 0" material="metal"/>
+      <xacro:box_shape x="0.04" y="0.025" z="0.035" xyz="0 -0.025 0" material="servo"/>
+      <xacro:box_inertial mass="${sim.gimbal_mass}" x="0.045" y="0.05" z="0.035"/>
+    </link>
+    <joint name="${name}_inner_joint" type="revolute">
+      <parent link="${name}_outer_link"/><child link="${name}_carrier_link"/>
+      <axis xyz="0 1 0"/><limit lower="${-sim.tilt_joint_limit}" upper="${sim.tilt_joint_limit}" effort="${sim.tilt_effort}" velocity="${sim.tilt_velocity}"/>
+      <dynamics damping="0.1" friction="0.01"/>
+    </joint>
+    <link name="${name}_carrier_link">
+      <xacro:box_shape x="0.022" y="${meas.motor_spacing+0.03}" z="0.006"/>
+      <xacro:box_inertial mass="${sim.gimbal_mass}" x="0.022" y="${meas.motor_spacing+0.03}" z="0.006"/>
+    </link>
+    <xacro:motor_and_propeller unit="${name}" suffix="left" side="1"/>
+    <xacro:motor_and_propeller unit="${name}" suffix="right" side="-1"/>
+    <xacro:gazebo_color link="${name}_mount_link"/>
+    <xacro:gazebo_color link="${name}_outer_link" color="Grey"/>
+    <xacro:gazebo_color link="${name}_carrier_link"/>
+  </xacro:macro>
+
+  <xacro:macro name="landing_side" params="name side">
+    <xacro:tube_between name="${name}_front_leg" parent="uav_base_link" ax="${est.landing_half_length}" ay="${side*est.deck_y/2}" az="-0.02" bx="${est.landing_half_length}" by="${side*est.landing_half_width}" bz="${-est.landing_height}" radius="0.008" mass="${sim.landing_leg_mass}"/>
+    <xacro:tube_between name="${name}_rear_leg" parent="uav_base_link" ax="${-est.landing_half_length}" ay="${side*est.deck_y/2}" az="-0.02" bx="${-est.landing_half_length}" by="${side*est.landing_half_width}" bz="${-est.landing_height}" radius="0.008" mass="${sim.landing_leg_mass}"/>
+    <xacro:tube_between name="${name}_skid" parent="uav_base_link" ax="${-est.skid_length/2}" ay="${side*est.landing_half_width}" az="${-est.landing_height}" bx="${est.skid_length/2}" by="${side*est.landing_half_width}" bz="${-est.landing_height}" radius="0.012" mass="${sim.skid_mass}"/>
+  </xacro:macro>
+
+  <xacro:macro name="vector_platform">
+    <xacro:property name="radius" value="${meas.triangle_side/sqrt(3)}"/>
+    <joint name="world_to_uav" type="fixed"><parent link="world"/><child link="uav_base_link"/><origin xyz="0 0 ${sim.world_height}"/></joint>
+    <link name="uav_base_link">
+      <xacro:box_shape x="${est.deck_x}" y="${est.deck_y}" z="${est.deck_z}"/>
+      <xacro:box_shape x="0.12" y="0.06" z="0.04" xyz="0 0 0.04" material="servo"/>
+      <xacro:box_inertial mass="${sim.deck_mass}" x="${est.deck_x}" y="${est.deck_y}" z="${est.deck_z}"/>
+    </link>
+    <xacro:gazebo_color link="uav_base_link"/>
+    <xacro:tube_between name="edge_ab" parent="uav_base_link" ax="${radius}" ay="0" az="0" bx="${-radius/2}" by="${meas.triangle_side/2}" bz="0" radius="${est.frame_tube_radius}" mass="${sim.frame_tube_mass}"/>
+    <xacro:tube_between name="edge_bc" parent="uav_base_link" ax="${-radius/2}" ay="${meas.triangle_side/2}" az="0" bx="${-radius/2}" by="${-meas.triangle_side/2}" bz="0" radius="${est.frame_tube_radius}" mass="${sim.frame_tube_mass}"/>
+    <xacro:tube_between name="edge_ca" parent="uav_base_link" ax="${-radius/2}" ay="${-meas.triangle_side/2}" az="0" bx="${radius}" by="0" bz="0" radius="${est.frame_tube_radius}" mass="${sim.frame_tube_mass}"/>
+    <xacro:tube_between name="rail_left" parent="uav_base_link" ax="${-radius/2}" ay="0.09" az="0" bx="${radius-sqrt(3)*0.09}" by="0.09" bz="0" radius="${est.frame_tube_radius}" mass="${sim.frame_tube_mass}"/>
+    <xacro:tube_between name="rail_right" parent="uav_base_link" ax="${-radius/2}" ay="-0.09" az="0" bx="${radius-sqrt(3)*0.09}" by="-0.09" bz="0" radius="${est.frame_tube_radius}" mass="${sim.frame_tube_mass}"/>
+    <xacro:landing_side name="left" side="1"/><xacro:landing_side name="right" side="-1"/>
+    <xacro:vector_unit name="unit_a" yaw="0"/>
+    <xacro:vector_unit name="unit_b" yaw="${2*pi/3}"/>
+    <xacro:vector_unit name="unit_c" yaw="${4*pi/3}"/>
+  </xacro:macro>
+</robot>

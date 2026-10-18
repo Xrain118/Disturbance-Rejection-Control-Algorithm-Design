@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="dragonfly_arm">
+  <xacro:arg name="use_sim_time" default="true"/>
+  <xacro:property name="cfg" value="${xacro.load_yaml('../config/model_dimensions.yaml')}"/>
+  <xacro:property name="meas" value="${cfg.measured}"/>
+  <xacro:property name="kin" value="${cfg.arm_kinematics}"/>
+  <xacro:property name="hardware" value="${cfg.arm_hardware}"/>
+  <xacro:property name="weights" value="${cfg.arm_dynamics.mass_weights}"/>
+  <xacro:property name="mass_scale" value="${meas.arm_mass/(weights.base+weights.column+weights.upper_arm+weights.forearm+weights.wrist+weights.gripper)}"/>
+  <xacro:property name="est" value="${cfg.estimated}"/>
+  <xacro:property name="sim" value="${cfg.simulation}"/>
+  <xacro:include filename="geometry_macros.xacro"/>
+  <xacro:include filename="vector_platform.xacro"/>
+  <xacro:include filename="five_axis_arm.xacro"/>
+
+  <!-- Fixed-base kinematic demonstrator; this constraint must be removed
+       together with adding flight physics, NOT simply when adding wind. -->
+  <link name="world"/>
+  <gazebo reference="world"><static>true</static></gazebo>
+  <xacro:vector_platform/>
+  <!-- One continuous under-deck plate carries both arms.  The 0.40 m width
+       covers the two 0.30 m-spaced bases plus their 0.06 m footprints. -->
+  <xacro:fixed_box name="dual_arm_mount_plate" parent="uav_base_link"
+    x="${est.arm_mount_plate_x}" y="${est.arm_mount_plate_y}" z="${est.arm_mount_plate_z}"
+    xyz="0 0 ${-est.deck_z/2-est.arm_mount_plate_z/2}"
+    mass="${sim.arm_mount_plate_mass}" material="metal" color="Grey"/>
+  <xacro:five_axis_arm prefix="left" mount_y="${meas.arm_spacing/2}"/>
+  <xacro:five_axis_arm prefix="right" mount_y="${-meas.arm_spacing/2}"/>
+
+  <ros2_control name="GazeboSimSystem" type="system">
+    <hardware><plugin>gz_ros2_control/GazeboSimSystem</plugin></hardware>
+    <xacro:controlled_joint name="left_joint_1" lower="${kin.joint_limits.base.lower}" upper="${kin.joint_limits.base.upper}"/>
+    <xacro:controlled_joint name="left_joint_2" lower="${kin.joint_limits.shoulder.lower}" upper="${kin.joint_limits.shoulder.upper}"/>
+    <xacro:controlled_joint name="left_joint_3" lower="${kin.joint_limits.elbow.lower}" upper="${kin.joint_limits.elbow.upper}"/>
+    <xacro:controlled_joint name="left_joint_4" lower="${kin.joint_limits.wrist.lower}" upper="${kin.joint_limits.wrist.upper}"/>
+    <xacro:controlled_joint name="left_joint_5" lower="${kin.joint_limits.roll.lower}" upper="${kin.joint_limits.roll.upper}"/>
+    <xacro:controlled_joint name="right_joint_1" lower="${kin.joint_limits.base.lower}" upper="${kin.joint_limits.base.upper}"/>
+    <xacro:controlled_joint name="right_joint_2" lower="${kin.joint_limits.shoulder.lower}" upper="${kin.joint_limits.shoulder.upper}"/>
+    <xacro:controlled_joint name="right_joint_3" lower="${kin.joint_limits.elbow.lower}" upper="${kin.joint_limits.elbow.upper}"/>
+    <xacro:controlled_joint name="right_joint_4" lower="${kin.joint_limits.wrist.lower}" upper="${kin.joint_limits.wrist.upper}"/>
+    <xacro:controlled_joint name="right_joint_5" lower="${kin.joint_limits.roll.lower}" upper="${kin.joint_limits.roll.upper}"/>
+    <xacro:controlled_joint name="unit_a_outer_joint"/>
+    <xacro:controlled_joint name="unit_a_inner_joint"/>
+    <xacro:controlled_joint name="unit_b_outer_joint"/>
+    <xacro:controlled_joint name="unit_b_inner_joint"/>
+    <xacro:controlled_joint name="unit_c_outer_joint"/>
+    <xacro:controlled_joint name="unit_c_inner_joint"/>
+  </ros2_control>
+  <gazebo>
+    <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <robot_param>robot_description</robot_param>
+      <robot_param_node>robot_state_publisher</robot_param_node>
+      <parameters>${xacro.abs_filename('../config/controllers.yaml')}</parameters>
+    </plugin>
+  </gazebo>
+</robot>

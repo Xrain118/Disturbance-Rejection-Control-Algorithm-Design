@@ -1,0 +1,127 @@
+# SI units. RoArm-M3-S drawing geometry and 12 V manufacturer specifications.
+# Platform geometry remains measured, photo-estimated, or simulation-only as marked.
+measured:
+  triangle_side: 1.2
+  motor_spacing: 0.36
+  propeller_radius: 0.116
+  arm_spacing: 0.30
+  arm_mass: 0.9735
+  arm_mass_tolerance: 0.015
+  upper_arm_outer_width: 0.0378
+  shoulder_bracket_height: 0.05346
+  arm_base_plate_thickness: 0.003
+arm_kinematics:
+  # EEMode=1 geometry, with the owner's drawing taking precedence for L4B.
+  # Drawing L4B=13.29 mm; original Arduino L4B=13.69 mm is unchanged there.
+  # Coordinates are expressed in the arm base frame: +X forward, +Y left,
+  # +Z upward.  Joint order is base, shoulder, elbow, wrist, roll.
+  base_to_shoulder: 0.12606
+  shoulder_to_elbow_x: 0.03000
+  shoulder_to_elbow_z: 0.23682
+  elbow_to_wrist_x: 0.00000
+  elbow_to_wrist_z: 0.14449
+  wrist_to_tool_x: 0.01329
+  wrist_to_tool_z: 0.17167
+  home: [0.0, 0.0, 1.5707963267948966, 0.0, 0.0]
+  joint_limits:
+    base: {lower: -3.141592653589793, upper: 3.141592653589793}
+    shoulder: {lower: -1.5707963267948966, upper: 1.5707963267948966}
+    elbow: {lower: 0.0, upper: 3.141592653589793}
+    wrist: {lower: -1.5707963267948966, upper: 1.5707963267948966}
+    roll: {lower: -3.141592653589793, upper: 3.141592653589793}
+arm_hardware:
+  model: RoArm-M3-S
+  controller: ESP32
+  supply_voltage: 12.0
+  motion_dof: 5
+  gripper_dof: 1
+  payload_mass: 0.2
+  payload_distance: 0.5
+  workspace_diameter_approx: 1.0
+  base_range_degrees: 360.0
+  sources:
+    arm: https://docs.waveshare.net/RoArm-M3/
+    ST3215: https://www.waveshare.com/product/st3215-servo.htm
+    ST3215-HS: https://www.waveshare.com/product/robotics/st3215-hs-servo-motor.htm
+  # Manufacturer maximum / stall torque, NOT continuous torque ratings.
+  kgf_cm_to_nm: 0.0980665
+  servos:
+    ST3215:
+      stall_torque_kgf_cm: 30.0
+      no_load_speed_rpm: 45.0
+      body_length: 0.04522
+      body_width: 0.02472
+      body_height: 0.035
+    ST3215-HS:
+      stall_torque_kgf_cm: 20.0
+      no_load_speed_rpm: 106.0
+      body_length: 0.04522
+      body_width: 0.02472
+      body_height: 0.035
+  joints:
+    base: {servo: ST3215, count: 1}
+    shoulder: {servo: ST3215, count: 2}
+    elbow: {servo: ST3215, count: 1}
+    wrist: {servo: ST3215, count: 1}
+    roll: {servo: ST3215, count: 1}
+    gripper: {servo: ST3215-HS, count: 1}
+  # Reference only: the table clamp is not installed on the UAV.
+  table_clamp_mass: 0.290
+  table_clamp_mass_tolerance: 0.010
+  table_clamp_height: 0.086
+  table_clamp_outer_depth: 0.092
+  table_clamp_inner_depth: 0.0879
+  table_clamp_outer_width: 0.08522
+  table_clamp_inner_width: 0.0816
+  drawing_horizontal_length: 0.31615
+arm_dynamics:
+  # Estimated link mass distribution, normalized to measured.arm_mass.
+  # COM and inertia remain equivalent-box estimates, not measurements.
+  mass_weights:
+    base: 10.0
+    column: 8.0
+    upper_arm: 14.0
+    forearm: 10.0
+    wrist: 6.0
+    gripper: 10.0
+estimated:
+  frame_tube_radius: 0.012
+  deck_x: 0.26
+  deck_y: 0.20
+  deck_z: 0.04
+  landing_height: 0.55
+  landing_half_width: 0.24
+  landing_half_length: 0.23
+  skid_length: 0.70
+  unit_height: 0.06
+  motor_radius: 0.015
+  motor_height: 0.020
+  motor_center_height: 0.025
+  blade_width: 0.018
+  blade_thickness: 0.002
+  arm_mount_z: -0.050
+  # Common plate directly below the centre avionics deck.  It spans both
+  # 0.30 m-spaced arm bases so neither arm is attached outside the structure.
+  arm_mount_plate_x: 0.14
+  arm_mount_plate_y: 0.40
+  arm_mount_plate_z: 0.012
+  arm_rail_width: 0.008
+  arm_rail_depth: 0.012
+  arm_half_width: 0.021
+simulation:
+  world_height: 1.60
+  tilt_joint_limit: 1.5707963267948966
+  arm_velocity: 0.6
+  tilt_velocity: 0.5
+  tilt_effort: 8.0
+  # Placeholder masses in kg. Replace before flight/disturbance experiments.
+  deck_mass: 1.5
+  frame_tube_mass: 0.12
+  landing_leg_mass: 0.05
+  skid_mass: 0.07
+  mount_mass: 0.06
+  gimbal_mass: 0.06
+  motor_mass: 0.05
+  propeller_mass: 0.008
+  arm_adapter_mass: 0.03
+  arm_mount_plate_mass: 0.08

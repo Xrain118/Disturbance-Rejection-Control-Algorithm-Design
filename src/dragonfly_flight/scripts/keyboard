@@ -1,0 +1,3 @@
+#!/usr/bin/env python3
+from dragonfly_flight.arms import keyboard
+keyboard()

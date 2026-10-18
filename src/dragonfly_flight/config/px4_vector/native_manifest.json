@@ -1,0 +1,86 @@
+[
+  {
+    "path": "src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.cpp",
+    "sha256": "07e60bc11a9948d41c99950fd99fff06368bb6203f05b79d64386a0a04351d7c"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/ControlAllocationSequentialDesaturation.hpp",
+    "sha256": "a610360ce292c5b644617022b3c552161e5b7251cba23708b07ffb4a2ae9210e"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/DragonflyAllocation.hpp",
+    "sha256": "3b4cfc9fb52dad6f573bcdd6579bcf5c6d28acd29fd87953bd4c783bf0dfdd79"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.hpp",
+    "sha256": "4b0e69a238a3cc08f3d05fb073e89431dd0449c88ccfe664c43540f506554200"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/ControlAllocationDragonfly.cpp",
+    "sha256": "d5037f8aca14f035bd3dc3251eab0b9c175b4c84324f3b17a3b28d16239a02f2"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/ControlAllocation.hpp",
+    "sha256": "ac769cc0c32aa627921fb0874cf6d1915bbd18946c83567af9eceab3d8b42e3a"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/CMakeLists.txt",
+    "sha256": "64bf239777a6f00457e3334297eaa34f456434e6076ae6924b53647b65426b82"
+  },
+  {
+    "path": "src/lib/control_allocation/control_allocation/dragonfly_params.c",
+    "sha256": "6d166db5438c0ee6a8f37b51a9dd4f206af20e5e9f52d4a3720bbce303a39b58"
+  },
+  {
+    "path": "src/lib/control_allocation/actuator_effectiveness/ActuatorEffectiveness.hpp",
+    "sha256": "b20d7e49aa93af9cc8098ff7334147ab57b28118bedb24028f2f535d1d4f2461"
+  },
+  {
+    "path": "src/modules/control_allocator/VehicleActuatorEffectiveness/ActuatorEffectivenessDragonfly.hpp",
+    "sha256": "8d9658f3804c3f6a41ee5b8eb4e9d3ba6d7ce39bc75de0110bdd719989ec5e9f"
+  },
+  {
+    "path": "src/modules/control_allocator/ControlAllocator.cpp",
+    "sha256": "9de4748241687420aee9eda82691171ddee4485696cad17f78e3218b9812e5bb"
+  },
+  {
+    "path": "src/modules/control_allocator/ControlAllocator.hpp",
+    "sha256": "3ad8ca7f994e79e74e24f192b8e248f7d7af0c3842632440be2d553d8343ffb4"
+  },
+  {
+    "path": "src/modules/control_allocator/module.yaml",
+    "sha256": "c589f6cc670eb41189f7cdfed64f4aff4f269780d2a27687350d944d7ae9bbf8"
+  },
+  {
+    "path": "src/modules/mc_pos_control/PositionControl/PositionControl.hpp",
+    "sha256": "7db9d73dc851d479fd013a8d7a42a43957606ce2dc7c637e79d086a9cc792ecb"
+  },
+  {
+    "path": "src/modules/mc_pos_control/PositionControl/PositionControl.cpp",
+    "sha256": "e2f384ac0211d6d2cef79de2784ca3c14cc02aeb052f0cfcd9a5a7387185409d"
+  },
+  {
+    "path": "src/modules/mc_pos_control/PositionControl/CMakeLists.txt",
+    "sha256": "1c7e5f8c4633274e53e4b5a3423d9950c71b2a03b8e65f8d0b7065d9d664d183"
+  },
+  {
+    "path": "src/modules/mc_pos_control/MulticopterPositionControl.hpp",
+    "sha256": "d38728a068a1a6b68de45be0a3ebb9c0eceb96e75c4ce5b3f8e37f33699c98c1"
+  },
+  {
+    "path": "src/modules/mc_pos_control/MulticopterPositionControl.cpp",
+    "sha256": "c72d27b420dddaa4f00eeedac5c850670526238490f7298c2d5dc272c93c6461"
+  },
+  {
+    "path": "src/modules/uxrce_dds_client/dds_topics.yaml",
+    "sha256": "1442309a39354670b1060882eddcd223b3ea62904a2af91e021d1b2cff21c80e"
+  },
+  {
+    "path": "ROMFS/px4fmu_common/init.d-posix/airframes/40160_gz_dragonfly",
+    "sha256": "547d5c16983f557b34ada88072a12909da175f7529f157fcb5b6363d5baba04a"
+  },
+  {
+    "path": "ROMFS/px4fmu_common/init.d-posix/airframes/CMakeLists.txt",
+    "sha256": "229471026a8a52cb0866832336ed36bfca5b336d0c93e4ff06c03844affa7c4f"
+  }
+]
