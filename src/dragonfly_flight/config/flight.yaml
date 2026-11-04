@@ -22,3 +22,25 @@ position_kd: [2.8, 2.8, 3.2]
 attitude_kp: [8.0, 8.0, 5.0]
 attitude_kd: [4.0, 4.0, 3.0]
 hover_height: 1.6
+# First-version simulation limits for model-difference feedforward only.
+# These are not calibrated hardware safety limits.
+feedforward_force_limit: [15.0, 15.0, 20.0]
+feedforward_torque_limit: [3.0, 3.0, 3.0]
+# Six-dimensional flying-base net-residual NDOB.  These are unverified
+# simulation starting values, not calibrated hardware gains or safety limits.
+# Default settings preserve the original controller and produce no NDOB output.
+ndob:
+  enabled: true
+  shadow_mode: true
+  compensation_enabled: false
+  translation_gain: [6.0, 6.0, 6.0]
+  rotation_gain: [6.0, 6.0, 6.0]
+  force_limit: [20.0, 20.0, 20.0]
+  torque_limit: [3.0, 3.0, 3.0]
+  compensation_force_rate: [50.0, 50.0, 50.0]
+  compensation_torque_rate: [10.0, 10.0, 10.0]
+  state_timeout: 0.2
+  max_input_future: 0.02
+  max_dt: 0.05
+  max_time_jump: 0.5
+  saturation_hold_time: 0.2

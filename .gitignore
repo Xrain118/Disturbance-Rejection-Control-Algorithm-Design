@@ -17,3 +17,5 @@ src/dragonfly_flight/config/px4_vector/original/
 
 build-hardware/
 install-hardware/
+/build-ndob-sitl/
+/install-ndob-sitl/

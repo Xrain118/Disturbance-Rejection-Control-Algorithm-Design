@@ -2,6 +2,7 @@
 import argparse
 import errno
 import fcntl
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -84,19 +85,21 @@ def _acquire_px4_lock(px4_binary):
 
 def main():
     parser=argparse.ArgumentParser()
-    parser.add_argument('--mode',choices=['ideal_wrench','px4_native','px4_actuators','physics'],default='px4_native')
+    parser.add_argument('--mode',choices=['ideal_wrench','px4_native','px4_actuators','px4_wrench','physics'],default='px4_native')
     parser.add_argument('--gui',action='store_true')
     parser.add_argument('--scenario',choices=['hover','acceptance','physics','manual','freefall','force_x','force_y','force_z'],default='manual')
     parser.add_argument('--output',default='log/flight_'+time.strftime('%Y%m%d_%H%M%S'))
     parser.add_argument('--step',type=float,default=.002)
     parser.add_argument('--record',action='store_true')
+    parser.add_argument('--feedforward',action='store_true',help='Enable model-difference feedforward in px4_wrench mode')
     parser.add_argument('--px4',default=os.environ.get('PX4_ROOT', str(Path.home()/'PX4-Autopilot')))
     args=parser.parse_args()
     if args.scenario in ('freefall','force_x','force_y','force_z') and args.mode!='ideal_wrench':
         parser.error('Force diagnostics require --mode ideal_wrench')
     if args.scenario=='physics' and args.mode!='physics':parser.error('Use --mode physics --scenario physics together')
+    if args.feedforward and args.mode!='px4_wrench':parser.error('--feedforward requires --mode px4_wrench')
     run_lock = None
-    if args.mode in ('px4_actuators', 'px4_native'):
+    if args.mode in ('px4_actuators', 'px4_native', 'px4_wrench'):
         px4_binary = Path(args.px4)/'build/px4_sitl_default/bin/px4'
         try:
             run_lock = _acquire_px4_lock(px4_binary)
@@ -137,7 +140,7 @@ def main():
                    '--param-file',str(out/'controllers.yaml')],c))
         for process in spawners:
             if process.wait(timeout=100):raise RuntimeError('Controller activation failed; see spawner logs')
-        if args.mode in ('px4_actuators', 'px4_native'):
+        if args.mode in ('px4_actuators', 'px4_native', 'px4_wrench'):
             px4=Path(args.px4)
             version=subprocess.check_output(['git','-C',str(px4),'describe','--tags','--always'],text=True).strip()
             if version!='v1.16.2': raise RuntimeError('This profile is verified for PX4 v1.16.2, found '+version)
@@ -153,13 +156,13 @@ def main():
             for i in range(1,7):
                 params.update({f'SIM_GZ_EC_FUNC{i}':100+i,f'SIM_GZ_EC_MIN{i}':0,f'SIM_GZ_EC_MAX{i}':1000,
                                f'SIM_GZ_SV_FUNC{i}':200+i,f'SIM_GZ_SV_MINA{i}':-90,f'SIM_GZ_SV_MAXA{i}':90})
-            if args.mode == 'px4_native':
+            if args.mode in ('px4_native','px4_wrench'):
                 from .native import px4_parameters
                 params.update(px4_parameters(metadata))
             else:
                 params.update(DF_EN=0, CA_AIRFRAME=0, CA_METHOD=1)
             env=os.environ.copy(); env.update({f'PX4_PARAM_{k}':str(v) for k,v in params.items()})
-            env.update(PX4_SYS_AUTOSTART='40160' if args.mode=='px4_native' else '4001',PX4_GZ_STANDALONE='1',PX4_GZ_MODEL_NAME='dragonfly',PX4_GZ_WORLD='default',
+            env.update(PX4_SYS_AUTOSTART='40160' if args.mode in ('px4_native','px4_wrench') else '4001',PX4_GZ_STANDALONE='1',PX4_GZ_MODEL_NAME='dragonfly',PX4_GZ_WORLD='default',
                        PX4_UXRCE_DDS_PORT='8888',PX4_GZ_MAG_ENU='1')
             (out/'px4_parameters.json').write_text(json.dumps(params,indent=2))
             # Apply after the stock airframe's set-default commands; setting a
@@ -169,18 +172,31 @@ def main():
                                '\n'.join(f'param set {k} {v}' for k,v in params.items())+'\n')
             instance=out/'px4'; instance.mkdir(exist_ok=True)
             critical.append(('DDS agent',start(['MicroXRCEAgent','udp4','-p',str(PX4_DDS_PORT)],'dds')))
-            critical.append(('PX4',start([str(px4/'build/px4_sitl_default/bin/px4'),'-d',str(px4/'build/px4_sitl_default/etc'),'-s',str(startup)],
+            critical.append(('PX4',start([str(px4/'build/px4_sitl_default/bin/px4'),'-d',str(px4/'build/px4_sitl_default/etc'),'-s',os.path.relpath(startup,instance)],
                   'px4',cwd=instance,env=env)))
-        if args.record:
-            start(['ros2','bag','record','-o',str(out/'bag'),'/clock','/dragonfly/truth','/joint_states','/dragonfly/efforts',
+            if args.mode=='px4_wrench':
+                model_version=hashlib.sha256((out/'model.json').read_bytes()).hexdigest()
+                critical.append(('FCU bridge',start(['ros2','launch','dragonfly_fcu_bridge','fcu_bridge.launch.py',
+                    'model_metadata:='+str(out/'model.json'),'expected_model_version:='+model_version],'fcu_bridge')))
+        record_topics=['/clock','/dragonfly/truth','/joint_states','/dragonfly/efforts',
                    '/dragonfly/rotor_speeds','/dragonfly/tilt_efforts','/dragonfly/arm_status','/dragonfly/status','/dragonfly/diagnostics',
                    '/dragonfly/reference_pose','/dragonfly/position_error','/dragonfly/position_error_norm',
                    '/dragonfly/attitude_error','/dragonfly/attitude_error_norm','/dragonfly/arm_active','/dragonfly/ready',
                    '/left_arm_controller/controller_state','/right_arm_controller/controller_state',
-                   '/fmu/out/vehicle_odometry','/fmu/out/vehicle_status_v1','/fmu/in/actuator_motors','/fmu/in/actuator_servos','/fmu/in/trajectory_setpoint',
+                   '/fmu/out/vehicle_odometry','/fmu/out/vehicle_status_v1','/fmu/in/offboard_control_mode',
+                   '/fmu/in/actuator_motors','/fmu/in/actuator_servos','/fmu/in/trajectory_setpoint',
                    '/fmu/out/actuator_motors','/fmu/out/actuator_servos','/fmu/out/control_allocator_status',
-                   '/fmu/out/vehicle_thrust_setpoint','/fmu/out/vehicle_torque_setpoint','/fmu/out/vehicle_control_mode'], 'rosbag')
-        runtime=start([sys.executable,'-m','dragonfly_flight.runtime','--output',str(out),'--scenario',args.scenario], 'controller')
+                   '/fmu/out/vehicle_thrust_setpoint','/fmu/out/vehicle_torque_setpoint','/fmu/out/vehicle_control_mode']
+        if args.mode=='px4_wrench':
+            record_topics+=['/research/body_wrench_command','/research/fcu_bridge/diagnostics',
+                            '/fmu/in/vehicle_thrust_setpoint','/fmu/in/vehicle_torque_setpoint']
+            if metadata['config'].get('ndob',{}).get('enabled',False):
+                record_topics+=['/research/ndob/estimated_wrench','/research/ndob/compensation_wrench',
+                                '/research/ndob/status']
+        if args.record:start(['ros2','bag','record','-o',str(out/'bag')]+record_topics,'rosbag')
+        runtime_cmd=[sys.executable,'-m','dragonfly_flight.runtime','--output',str(out),'--scenario',args.scenario]
+        if args.feedforward:runtime_cmd.append('--feedforward')
+        runtime=start(runtime_cmd,'controller')
         print(f'Run: {out}\nKeyboard: bash src/dragonfly_flight/scripts/sim.sh keyboard\nMonitor: bash src/dragonfly_flight/scripts/sim.sh monitor',flush=True)
         while runtime.poll() is None:
             if gz.poll() is not None: raise RuntimeError('Gazebo exited; see gazebo.log')

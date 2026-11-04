@@ -40,6 +40,7 @@ class ArmCommands:
         self.q={};self.v={};self.side='left';self.joint=0
         self.ready=False;self.safe=False;self.busy_until=0.;self.heartbeat=-1.;self.manual=False
         self.target={s:self.initial_pose.copy() for s in ARM_NAMES}; self.sequence=[]
+        self.trajectories={s:None for s in ARM_NAMES}
         self.pub={s:node.create_publisher(JointTrajectory,f'/{s}_arm_controller/joint_trajectory',10) for s in ARM_NAMES}
         self.status=node.create_publisher(String,'/dragonfly/arm_status',10)
         node.create_subscription(JointState,'/joint_states',self.state,qos_profile_sensor_data)
@@ -61,6 +62,27 @@ class ArmCommands:
     def at(self,target,tolerance=math.radians(1)):
         return self.initialized() and all(np.max(np.abs(self.positions(side)-target))<=tolerance for side in ARM_NAMES)
 
+    def reference(self,side,at_time=None):
+        """Sample the last commanded trajectory; hold its final state forever."""
+        if side not in ARM_NAMES:raise ValueError('Unknown arm side: '+str(side))
+        item=self.trajectories[side]
+        if item is None:return self.target[side].copy(),np.zeros(5),np.zeros(5)
+        start,msg=item;now=self.now() if at_time is None else float(at_time)
+        times=np.array([p.time_from_start.sec+p.time_from_start.nanosec*1e-9 for p in msg.points])
+        elapsed=np.clip(now-start,times[0],times[-1])
+        values=[]
+        for attribute in ('positions','velocities','accelerations'):
+            if all(len(getattr(p,attribute))==5 for p in msg.points):
+                samples=np.array([getattr(p,attribute) for p in msg.points])
+                values.append(np.array([np.interp(elapsed,times,samples[:,i]) for i in range(5)]))
+            else:values.append(np.zeros(5))
+        if now-start>=times[-1]:values[1:]=[np.zeros(5),np.zeros(5)]
+        return tuple(values)
+
+    def references(self,at_time=None):
+        states=[self.reference(side,at_time) for side in ARM_NAMES]
+        return tuple(np.concatenate([state[i] for state in states]) for i in range(3))
+
     def move(self,side,target,manual=False,constrain=True):
         now=self.now()
         if not self.initialized() or now-self.state_time>.2:
@@ -71,6 +93,7 @@ class ArmCommands:
             self.sequence=[];self.report('Rejected: path approaches landing gear');return False
         self.target[side]=target
         msg,dt=trajectory(ARM_NAMES[side],self.positions(side),self.target[side],self.cfg['arm_speed'],self.cfg['arm_acceleration'])
+        self.trajectories[side]=(now,msg)
         self.pub[side].publish(msg);self.busy_until=now+dt+.3;self.manual=manual
         self.report(f'{side} target {np.round(self.target[side],3).tolist()}');return True
 
@@ -85,6 +108,7 @@ class ArmCommands:
             self.sequence=[];self.report('Rejected: deployment path approaches landing gear');return False
         commands={side:trajectory(ARM_NAMES[side],starts[side],target,self.cfg['arm_speed'],self.cfg['arm_acceleration']) for side in ARM_NAMES}
         for side,(msg,_) in commands.items():
+            self.trajectories[side]=(now,msg)
             self.pub[side].publish(msg);self.target[side]=target.copy()
         self.busy_until=now+max(dt for _,dt in commands.values())+.3;self.manual=manual
         self.report(f'both arms target {np.round(target,3).tolist()}');return True
@@ -92,7 +116,7 @@ class ArmCommands:
     def stop(self):
         self.sequence=[];self.manual=False
         if not self.initialized():return
-        longest=0.
+        longest=0.;now=self.now()
         for side in ARM_NAMES:
             q=self.positions(side);v=np.array([self.v.get(n,0.) for n in ARM_NAMES[side]])
             total=max(.1,float(np.max(np.abs(v)))/self.cfg['arm_acceleration'])
@@ -100,10 +124,11 @@ class ArmCommands:
             msg=JointTrajectory(joint_names=ARM_NAMES[side])
             for t in np.linspace(0,total,11):
                 p=JointTrajectoryPoint();p.positions=self.constrain(q+v*t-.5*v*t*t/total).tolist()
-                p.velocities=(v*(1-t/total)).tolist()
+                p.velocities=(v*(1-t/total)).tolist();p.accelerations=(-v/total).tolist()
                 p.time_from_start=Duration(sec=int(t),nanosec=int(t%1*1e9));msg.points.append(p)
-            msg.points[-1].positions=end.tolist();self.pub[side].publish(msg);self.target[side]=end;longest=max(longest,total)
-        self.busy_until=self.now()+longest+.3;self.report('Stopped arms; flight controller remains active')
+            msg.points[-1].positions=end.tolist();self.trajectories[side]=(now,msg)
+            self.pub[side].publish(msg);self.target[side]=end;longest=max(longest,total)
+        self.busy_until=now+longest+.3;self.report('Stopped arms; flight controller remains active')
 
     def replay(self,side):
         target=VERTICAL.copy();target[1]+=math.radians(5)

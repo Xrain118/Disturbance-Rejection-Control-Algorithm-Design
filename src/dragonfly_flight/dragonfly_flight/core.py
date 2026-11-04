@@ -63,6 +63,20 @@ class Platform:
     def wrench(self, z):
         return self.matrix(z[6:]) @ z[:6]
 
+    def desired_base_acceleration(self, p, v, rot, omega, target):
+        """Return [v_dot, omega_dot] in body FLU for inverse dynamics.
+
+        The translational part is the body derivative of body velocity, not
+        the world physical acceleration. Gravity is added by inverse dynamics.
+        """
+        cfg = self.cfg
+        acc_world = np.array(cfg['position_kp'])*(target-p) - np.array(cfg['position_kd'])*v
+        # Desired orientation is level, yaw=0 in ENU; omega is body FLU.
+        er = np.array([rot[2, 1]-rot[1, 2], rot[0, 2]-rot[2, 0], rot[1, 0]-rot[0, 1]])/2
+        dot_omega = -np.array(cfg['attitude_kp'])*er - np.array(cfg['attitude_kd'])*omega
+        dot_v = rot.T @ acc_world - np.cross(omega, rot.T @ v)
+        return np.r_[dot_v, dot_omega]
+
     def control(self, p, v, rot, omega, target):
         cfg = self.cfg
         acc = np.array(cfg['position_kp'])*(target-p) - np.array(cfg['position_kd'])*v

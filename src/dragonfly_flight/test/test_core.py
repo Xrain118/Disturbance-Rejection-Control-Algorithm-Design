@@ -48,3 +48,12 @@ def test_pointing_trajectory_limits_and_endpoints():
     assert np.allclose(msg.points[-1].positions,end)
     assert max(abs(v) for p in msg.points for v in p.velocities)<=.10001
     assert max(abs(v) for p in msg.points for v in p.accelerations)<=.20001
+
+
+def test_desired_base_acceleration_excludes_gravity_and_includes_transport():
+    model=platform();p=np.array([.2,-.1,.8]);v=np.array([.1,.2,-.3])
+    target=np.array([0.,0.,1.6]);omega=np.array([.03,-.02,.04]);rot=np.eye(3)
+    result=model.desired_base_acceleration(p,v,rot,omega,target)
+    acc_world=np.array(model.cfg['position_kp'])*(target-p)-np.array(model.cfg['position_kd'])*v
+    assert np.allclose(result[:3],acc_world-np.cross(omega,v))
+    assert np.allclose(result[3:],-np.array(model.cfg['attitude_kd'])*omega)

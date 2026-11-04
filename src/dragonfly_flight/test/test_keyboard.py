@@ -69,3 +69,16 @@ def test_pair_deployment_is_synchronous():
     assert len(arm.pub['left'].messages)==len(arm.pub['right'].messages)==1
     assert np.allclose(arm.pub['left'].messages[-1].points[-1].positions,VERTICAL)
     assert np.allclose(arm.pub['right'].messages[-1].points[-1].positions,VERTICAL)
+
+
+def test_commanded_trajectory_sampling_and_terminal_hold():
+    node,arm=manager();assert arm.move('left',VERTICAL+np.array([0,.05,0,0,0]))
+    msg=arm.pub['left'].messages[-1]
+    total=msg.points[-1].time_from_start.sec+msg.points[-1].time_from_start.nanosec*1e-9
+    q0,dq0,ddq0=arm.reference('left',node.time)
+    qm,dqm,ddqm=arm.reference('left',node.time+total/2)
+    qf,dqf,ddqf=arm.reference('left',node.time+total+10)
+    assert np.allclose(q0,VERTICAL) and np.allclose(dq0,0) and np.allclose(ddq0,0)
+    assert 0<qm[1]<.05 and dqm[1]>0 and np.isfinite(ddqm).all()
+    assert np.allclose(qf,arm.target['left']) and np.allclose(dqf,0) and np.allclose(ddqf,0)
+    assert np.allclose(arm.reference('right',node.time+total+10)[0],VERTICAL)

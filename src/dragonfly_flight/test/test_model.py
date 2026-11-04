@@ -8,6 +8,7 @@ from dragonfly_flight.model import generate
 from dragonfly_flight.native import px4_parameters
 from dragonfly_flight.effort import ordered_arm_effort_limits, arm_effort_ratios
 from dragonfly_flight.core import ARM_NAMES
+from dragonfly_flight.coupled_dynamics import CoupledDynamics
 
 
 NAMES = [name for side in ('left', 'right') for name in ARM_NAMES[side]]
@@ -50,6 +51,19 @@ def test_mass_and_named_efforts_reach_all_generated_interfaces(assets):
     inertia = np.asarray(metadata['inertia'])
     for row, col in ((0, 0), (1, 1), (2, 2), (0, 1), (0, 2), (1, 2)):
         assert params['DF_I' + 'XYZ'[row] + 'XYZ'[col]] == pytest.approx(inertia[row, col])
+
+
+def test_coupled_dynamics_uses_the_same_generated_mass_properties(assets):
+    output,metadata=assets;dynamics=CoupledDynamics.from_urdf(output/'robot.urdf')
+    zero=np.zeros(10)
+    result=dynamics.evaluate(np.eye(3),np.zeros(3),np.zeros(3),zero,zero,zero,np.zeros(6))
+    mass=metadata['mass'];com=np.asarray(metadata['com']);inertia=np.asarray(metadata['inertia'])
+    expected_origin_inertia=inertia+mass*(np.dot(com,com)*np.eye(3)-np.outer(com,com))
+    assert result.m_bb[:3,:3]==pytest.approx(mass*np.eye(3))
+    assert result.m_bb[3:,3:]==pytest.approx(expected_origin_inertia)
+    expected_force=np.array([0.,0.,mass*9.81])
+    assert result.wrench[:3]==pytest.approx(expected_force)
+    assert result.wrench[3:]==pytest.approx(np.cross(com,expected_force))
 
 
 def test_joint_names_control_order_and_saturation_instead_of_global_maximum():

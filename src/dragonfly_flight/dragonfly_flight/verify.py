@@ -112,13 +112,16 @@ def evaluate(directory):
         result['max_arm_effort_per_joint_nm']=dict(zip(names,peaks.tolist()))
         result['max_arm_effort_ratio']=float(np.max(arm_effort_ratios(peaks,limits)))
         result['arm_effort_limits_pass']=bool(np.all(peaks<=limits+1e-6))
-        result['rotor_mode']=model['mode'] in ('px4_actuators','px4_native')
+        result['rotor_mode']=model['mode'] in ('px4_actuators','px4_native','px4_wrench')
         result['passed'] &= result['sampled_gear_clearance_pass'] and result['arm_effort_limits_pass'] and result['rotor_mode']
     model=json.loads((directory/'model.json').read_text())
-    if model['mode']=='px4_native':
-        evidence=json.loads((directory/'native_chain.json').read_text()) if (directory/'native_chain.json').exists() else {}
+    if model['mode'] in ('px4_native','px4_wrench'):
+        filename='native_chain.json' if model['mode']=='px4_native' else 'wrench_chain.json'
+        evidence=json.loads((directory/filename).read_text()) if (directory/filename).exists() else {}
         result['native_control_chain']=evidence
         result['passed'] &= bool(evidence) and not evidence.get('ros_publishes_actuators',True)
+        if model['mode']=='px4_wrench':
+            result['passed'] &= evidence.get('flag_control_allocation_enabled',False) and evidence.get('flag_control_offboard_enabled',False)
     (directory/'metrics.json').write_text(json.dumps(result,indent=2))
     return result
 

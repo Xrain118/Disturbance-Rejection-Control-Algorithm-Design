@@ -5,6 +5,7 @@
   <maintainer email="dragonfly@example.com">Dragonfly</maintainer><license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend><buildtool_depend>ament_cmake_python</buildtool_depend>
   <exec_depend>dragonfly_arm</exec_depend><exec_depend>rclpy</exec_depend>
+  <exec_depend>dragonfly_interfaces</exec_depend><exec_depend>dragonfly_fcu_bridge</exec_depend>
   <exec_depend>px4_msgs</exec_depend><exec_depend>ros_gz_bridge</exec_depend>
   <exec_depend>nav_msgs</exec_depend><exec_depend>geometry_msgs</exec_depend>
   <exec_depend>sensor_msgs</exec_depend><exec_depend>std_msgs</exec_depend>

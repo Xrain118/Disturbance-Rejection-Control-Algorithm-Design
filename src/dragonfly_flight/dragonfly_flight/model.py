@@ -86,7 +86,7 @@ def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002):
     stowed_mass, stowed_com, stowed_inertia = inertial_properties(robot,stowed_positions)
     if not np.isclose(stowed_mass,mass):raise ValueError('Arm pose changed total mass')
     model = Platform(dimensions, cfg, mass, com, inertia)
-    initial_arm_pose = STOWED if mode in ('px4_actuators', 'px4_native') else VERTICAL
+    initial_arm_pose = STOWED if mode in ('px4_actuators', 'px4_native', 'px4_wrench') else VERTICAL
     metadata = dict(dimensions=dimensions, config=cfg, mass=mass, com=com.tolist(), inertia=inertia.tolist(),
                     arm_effort_limits=arm_effort_limits,
                     motor_constant=model.kf, max_thrust=model.max_thrust, mode=mode,
@@ -146,7 +146,7 @@ def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002):
         element(physics, 'arm_effort_limit', limit, joint=name)
     element(physics, 'ideal', str(mode == 'ideal_wrench').lower())
     for k, (unit, side) in enumerate((u, s) for u in 'abc' for s in ('left', 'right')):
-        if mode not in ('px4_actuators', 'px4_native'):
+        if mode not in ('px4_actuators', 'px4_native', 'px4_wrench'):
             continue
         plugin = element(vehicle, 'plugin', filename='gz-sim-multicopter-motor-model-system', name='gz::sim::systems::MulticopterMotorModel')
         values = dict(jointName=f'unit_{unit}_rotor_{side}_joint', linkName=f'unit_{unit}_rotor_{side}_link',

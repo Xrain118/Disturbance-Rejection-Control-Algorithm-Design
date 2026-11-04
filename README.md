@@ -1,10 +1,10 @@
 # Disturbance Rejection Control Algorithm Design
 
-整理日期：2026年10月18日。
+整理日期：2026年10月18日；2026年11月3日补充 NDOB 模块状态。
 
-研究双臂运动与外扰下的无人机稳定控制。当前交付包括 Dragonfly 仿真源码复用、双 ESP32 主动遥测接入、厂家参数电流力矩粗估、记录及回放。动力学前馈和残余扰动观测器仍待实现。原生 PX4 仿真作为独立基线，不连接真实机械臂。
+研究双臂运动与外扰下的无人机稳定控制。当前交付包括 Dragonfly 仿真源码复用、双 ESP32 主动遥测接入、厂家参数电流力矩粗估、记录及回放。第一版动力学前馈、六维 wrench 飞控桥接和飞行基座六维净残差 NDOB 已接入代码；NDOB 默认关闭，支持影子运行和独立补偿开关。ROS／Gazebo／PX4 动态验收及实机验证仍未完成。原生 PX4 仿真作为独立基线，不连接真实机械臂。
 
-[产品需求](产品需求.md) · [当前进度](当前进度.md) · [软件架构](软件架构.md) · [遥测协议](docs/telemetry-protocol.md) · [固件部署与修改](docs/firmware.md) · [验证记录](docs/verification-20261018.md)
+[产品需求](产品需求.md) · [当前进度](当前进度.md) · [软件架构](软件架构.md) · [NDOB 说明](docs/ndob.md) · [遥测协议](docs/telemetry-protocol.md) · [固件部署与修改](docs/firmware.md) · [验证记录](docs/verification-20261018.md)
 
 ## 构建与采集
 

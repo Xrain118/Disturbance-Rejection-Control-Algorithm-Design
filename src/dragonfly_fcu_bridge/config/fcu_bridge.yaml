@@ -1,0 +1,8 @@
+fcu_bridge:
+  ros__parameters:
+    model_metadata: ""
+    expected_model_version: ""
+    command_topic: "/research/body_wrench_command"
+    stale_timeout: 0.2
+    max_future: 0.05
+    use_sim_time: true
