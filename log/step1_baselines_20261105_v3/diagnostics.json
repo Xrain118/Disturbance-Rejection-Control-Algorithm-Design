@@ -1,0 +1,294 @@
+{
+  "batch_passed": false,
+  "attempts": [
+    {
+      "mode": "px4_native",
+      "round": 1,
+      "passed": true,
+      "wall_seconds": 370.1852419129999,
+      "failure": null,
+      "samples": 14630,
+      "phases": [
+        "arms_left",
+        "arms_right",
+        "deploying",
+        "deployment_recovery",
+        "hover",
+        "predeploy",
+        "takeoff",
+        "track0",
+        "track1",
+        "track2",
+        "track3"
+      ],
+      "last_t_s": 147.982,
+      "logged_control_rate_hz": 98.85661769674691,
+      "median_logged_dt_s": 0.00999999999999801,
+      "max_logged_dt_s": 0.1880000000000024,
+      "last_30s": {
+        "position_rms_m": 0.06076243857344677,
+        "attitude_rms_deg": 0.7748876582686789,
+        "mean_rpy_deg": [
+          0.011223276544404618,
+          0.059943040401916094,
+          -0.26806244378746785
+        ],
+        "mean_force_residual_n": 5.748363390695257e-06,
+        "mean_torque_residual_nm": 2.02195294777989e-06
+      },
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    },
+    {
+      "mode": "px4_wrench",
+      "round": 1,
+      "passed": false,
+      "wall_seconds": 506.9527581829999,
+      "failure": "Acceptance sequence did not finish in 220 seconds\nController exited (1); see controller.log",
+      "samples": 10424,
+      "phases": [
+        "predeploy",
+        "takeoff"
+      ],
+      "last_t_s": 220.00000000000003,
+      "logged_control_rate_hz": 47.37727272727272,
+      "median_logged_dt_s": 0.020000000000010232,
+      "max_logged_dt_s": 0.12199999999999989,
+      "last_30s": {
+        "position_rms_m": 0.20116026520106917,
+        "attitude_rms_deg": 20.38285818745261,
+        "mean_rpy_deg": [
+          -0.01881744152689688,
+          20.381668264209846,
+          0.160973795195108
+        ],
+        "mean_force_residual_n": 0.00012876566359306305,
+        "mean_torque_residual_nm": 3.2722522809870726e-06
+      },
+      "feedforward_enabled_samples": 0,
+      "max_applied_feedforward": 0.0,
+      "last_100_mean_predicted_delta_wrench": [
+        -0.38111945002981457,
+        -0.0016194377524165334,
+        0.36874016602245385,
+        -0.0009198132639491913,
+        -1.446072138239664,
+        -0.00011958751841745982
+      ],
+      "compute_median_ms": 36.38741150007263,
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    },
+    {
+      "mode": "px4_native",
+      "round": 2,
+      "passed": true,
+      "wall_seconds": 363.2316955509998,
+      "failure": null,
+      "samples": 14341,
+      "phases": [
+        "arms_left",
+        "arms_right",
+        "deploying",
+        "deployment_recovery",
+        "hover",
+        "predeploy",
+        "takeoff",
+        "track0",
+        "track1",
+        "track2",
+        "track3"
+      ],
+      "last_t_s": 145.072,
+      "logged_control_rate_hz": 98.84746884305724,
+      "median_logged_dt_s": 0.00999999999999801,
+      "max_logged_dt_s": 0.18599999999999994,
+      "last_30s": {
+        "position_rms_m": 0.0331309071871988,
+        "attitude_rms_deg": 0.8552660602424683,
+        "mean_rpy_deg": [
+          -0.00599682988258079,
+          0.05982971611041456,
+          0.444442999553885
+        ],
+        "mean_force_residual_n": 5.7659121443007e-06,
+        "mean_torque_residual_nm": 1.9798521887570858e-06
+      },
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    },
+    {
+      "mode": "px4_wrench",
+      "round": 2,
+      "passed": false,
+      "wall_seconds": 505.42234500100017,
+      "failure": "Acceptance sequence did not finish in 220 seconds\nController exited (1); see controller.log",
+      "samples": 9859,
+      "phases": [
+        "predeploy",
+        "takeoff"
+      ],
+      "last_t_s": 220.00400000000002,
+      "logged_control_rate_hz": 44.80827621315976,
+      "median_logged_dt_s": 0.02199999999999136,
+      "max_logged_dt_s": 0.1280000000000001,
+      "last_30s": {
+        "position_rms_m": 0.19565709517214164,
+        "attitude_rms_deg": 20.351929503995663,
+        "mean_rpy_deg": [
+          -0.016984248101477563,
+          20.349011810732872,
+          0.3040178258355632
+        ],
+        "mean_force_residual_n": 0.0001288041677411793,
+        "mean_torque_residual_nm": 3.3348926361301204e-06
+      },
+      "feedforward_enabled_samples": 0,
+      "max_applied_feedforward": 0.0,
+      "last_100_mean_predicted_delta_wrench": [
+        -0.3825228008443697,
+        -0.000977957133077097,
+        0.37009703086351914,
+        0.0021560053704406234,
+        -1.4469476461347404,
+        -0.0026933664368485877
+      ],
+      "compute_median_ms": 37.48484499999449,
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    },
+    {
+      "mode": "px4_native",
+      "round": 3,
+      "passed": true,
+      "wall_seconds": 371.52705688900005,
+      "failure": null,
+      "samples": 14708,
+      "phases": [
+        "arms_left",
+        "arms_right",
+        "deploying",
+        "deployment_recovery",
+        "hover",
+        "predeploy",
+        "takeoff",
+        "track0",
+        "track1",
+        "track2",
+        "track3"
+      ],
+      "last_t_s": 148.786,
+      "logged_control_rate_hz": 98.84666568091083,
+      "median_logged_dt_s": 0.00999999999999801,
+      "max_logged_dt_s": 0.18200000000000216,
+      "last_30s": {
+        "position_rms_m": 0.05749712992789426,
+        "attitude_rms_deg": 0.7043976577893788,
+        "mean_rpy_deg": [
+          -0.024330881405924126,
+          0.04932765131425646,
+          -0.009747075282499336
+        ],
+        "mean_force_residual_n": 5.810662813801949e-06,
+        "mean_torque_residual_nm": 2.0109112499605783e-06
+      },
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    },
+    {
+      "mode": "px4_wrench",
+      "round": 3,
+      "passed": false,
+      "wall_seconds": 505.23423626800013,
+      "failure": "Acceptance sequence did not finish in 220 seconds\nController exited (1); see controller.log",
+      "samples": 9611,
+      "phases": [
+        "predeploy",
+        "takeoff"
+      ],
+      "last_t_s": 220.006,
+      "logged_control_rate_hz": 43.68062689199385,
+      "median_logged_dt_s": 0.02200000000000557,
+      "max_logged_dt_s": 0.09600000000000009,
+      "last_30s": {
+        "position_rms_m": 0.2095359344484603,
+        "attitude_rms_deg": 20.229834794373325,
+        "mean_rpy_deg": [
+          0.014306701326682622,
+          20.228482911883564,
+          0.16707985155374613
+        ],
+        "mean_force_residual_n": 0.00012795552035267782,
+        "mean_torque_residual_nm": 3.1978007806259027e-06
+      },
+      "feedforward_enabled_samples": 0,
+      "max_applied_feedforward": 0.0,
+      "last_100_mean_predicted_delta_wrench": [
+        -0.38079257311670384,
+        -0.0012041431942540295,
+        0.36842558488245736,
+        -0.002430788957286481,
+        -1.4488520105269966,
+        0.001607467645762658
+      ],
+      "compute_median_ms": 38.43337499984045,
+      "has_ndob_log": false,
+      "has_rosbag": true,
+      "has_ulog": true
+    }
+  ],
+  "same_model_except_mode": true,
+  "same_flight_config": true,
+  "same_px4_binary": true,
+  "px4_manifest_matches": true,
+  "source_changes_from_first": [
+    [],
+    [
+      "src/dragonfly_flight/dragonfly_flight/provenance.py",
+      "src/dragonfly_flight/test/test_model.py",
+      "\u4ea7\u54c1\u9700\u6c42.md",
+      "\u8f6f\u4ef6\u67b6\u6784.md"
+    ],
+    [
+      "src/dragonfly_flight/dragonfly_flight/provenance.py",
+      "src/dragonfly_flight/test/test_model.py",
+      "\u4ea7\u54c1\u9700\u6c42.md",
+      "\u5f53\u524d\u8fdb\u5ea6.md",
+      "\u8f6f\u4ef6\u67b6\u6784.md"
+    ],
+    [
+      "src/dragonfly_flight/dragonfly_flight/provenance.py",
+      "src/dragonfly_flight/test/test_model.py",
+      "\u4ea7\u54c1\u9700\u6c42.md",
+      "\u5f53\u524d\u8fdb\u5ea6.md",
+      "\u8f6f\u4ef6\u67b6\u6784.md"
+    ],
+    [
+      "src/dragonfly_flight/dragonfly_flight/provenance.py",
+      "src/dragonfly_flight/test/test_model.py",
+      "\u4ea7\u54c1\u9700\u6c42.md",
+      "\u5f53\u524d\u8fdb\u5ea6.md",
+      "\u8f6f\u4ef6\u67b6\u6784.md"
+    ],
+    [
+      "src/dragonfly_flight/dragonfly_flight/provenance.py",
+      "src/dragonfly_flight/test/test_model.py",
+      "\u4ea7\u54c1\u9700\u6c42.md",
+      "\u5f53\u524d\u8fdb\u5ea6.md",
+      "\u8f6f\u4ef6\u67b6\u6784.md"
+    ]
+  ],
+  "control_source_changes_from_first": [
+    [],
+    [],
+    [],
+    [],
+    [],
+    []
+  ]
+}

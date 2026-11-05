@@ -8,6 +8,7 @@ import numpy as np
 from .clearance import GearClearance
 from .effort import ordered_arm_effort_limits, arm_effort_ratios
 from .core import ARM_NAMES
+from .native import control_chain_errors
 
 def longest_saturation(rows):
     longest=current=0.
@@ -31,6 +32,8 @@ def arm_metrics(rows,events,side):
     motion=[r for r in rows if start<=float(r['t'])<=end]
     pre=[r for r in rows if start-2<=float(r['t'])<start]
     if not motion or not pre:return None
+    if float(rows[-1]['t']) < end+5:
+        return None
     errors=np.array([[float(r[k]) for k in ('ex','ey','ez')] for r in motion])
     angles=np.array([float(r['angle']) for r in motion])
     actual=np.array([[float(r[k]) for k in ('x','y','z')] for r in motion])
@@ -71,7 +74,7 @@ def evaluate(directory):
     tracks={}
     for phase in ('track0','track1','track2','track3'):
         samples=[r for r in rows if r['phase']==phase]
-        if samples:
+        if samples and float(samples[-1]['t'])-float(samples[0]['t'])>=8:
             # Reference motion takes 3 s; evaluate 5 s after its completion.
             deadline=float(samples[0]['t'])+8
             end=min(samples,key=lambda r:abs(float(r['t'])-deadline))
@@ -119,9 +122,8 @@ def evaluate(directory):
         filename='native_chain.json' if model['mode']=='px4_native' else 'wrench_chain.json'
         evidence=json.loads((directory/filename).read_text()) if (directory/filename).exists() else {}
         result['native_control_chain']=evidence
-        result['passed'] &= bool(evidence) and not evidence.get('ros_publishes_actuators',True)
-        if model['mode']=='px4_wrench':
-            result['passed'] &= evidence.get('flag_control_allocation_enabled',False) and evidence.get('flag_control_offboard_enabled',False)
+        result['control_chain_errors']=control_chain_errors(model['mode'],evidence)
+        result['passed'] &= not result['control_chain_errors']
     (directory/'metrics.json').write_text(json.dumps(result,indent=2))
     return result
 

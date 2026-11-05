@@ -25,6 +25,8 @@ from .core import Platform, Allocator, NED_ENU, FRD_FLU, px4_rotation, smoothste
 from .arms import ArmCommands
 from .clearance import GearClearance
 from .effort import ordered_arm_effort_limits, arm_effort_ratios
+from .native import CONTROL_FLAGS, ACTUATOR_INPUT_TOPICS, control_chain_errors
+from dragonfly_fcu_bridge.wrench_adapter import WrenchScale, normalized_to_physical
 from dragonfly_control.coupled_dynamics import CoupledDynamics
 from dragonfly_control.feedforward import ModelFeedforward
 from dragonfly_control.ndob import MomentumNdob, coupled_momentum_and_bias, subtract_disturbance
@@ -34,6 +36,7 @@ class Runtime(Node):
         super().__init__('dragonfly_flight',parameter_overrides=[rclpy.parameter.Parameter('use_sim_time',value=True)])
         model_bytes=(out/'model.json').read_bytes();data=json.loads(model_bytes)
         self.model_version=hashlib.sha256(model_bytes).hexdigest()
+        self.wrench_scale=WrenchScale.from_model_metadata(data)
         self.mode=data['mode'];self.out=out;self.scenario=scenario;self.feedforward_enabled=bool(feedforward)
         self.model=Platform(data['dimensions'],data['config'],data['mass'],data['com'],data['inertia'])
         self.arm_effort_limits=ordered_arm_effort_limits(data)
@@ -242,32 +245,32 @@ class Runtime(Node):
         motors=np.array(outputs['actuator_motors'].control[:6]);servos=np.array(outputs['actuator_servos'].control[:6])
         if not np.isfinite(np.r_[motors,servos]).all():raise RuntimeError('Native PX4 produced non-finite actuator commands')
         z=np.r_[np.clip(motors,0,1)**2*self.model.max_thrust,np.clip(servos,-1,1)*self.model.cfg['tilt_limit']]
-        status=outputs['control_allocator_status'];acceleration=9.81*self.model.cfg['thrust_to_weight']
-        force=FRD_FLU@np.array(outputs['vehicle_thrust_setpoint'].xyz)*self.model.mass*acceleration
-        torque=self.vertical_inertia@(FRD_FLU@np.array(outputs['vehicle_torque_setpoint'].xyz))*(4/.15)
-        desired=np.r_[force,torque+np.cross(self.vertical_com,force)]
-        residual=np.r_[FRD_FLU@np.array(status.unallocated_thrust)*self.model.mass*acceleration,
-            self.vertical_inertia@(FRD_FLU@np.array(status.unallocated_torque))*(4/.15)]
-        if not self.native_proven:
-            mode=outputs.get('vehicle_control_mode')
-            if mode is not None:
-                evidence={key:bool(getattr(mode,key)) for key in ('flag_control_position_enabled',
-                    'flag_control_velocity_enabled','flag_control_attitude_enabled','flag_control_rates_enabled',
-                    'flag_control_allocation_enabled','flag_control_offboard_enabled')}
-                evidence.update(mode=self.mode,ros_publishes_actuators=False,
-                    actuator_source='PX4 control_allocator',thrust_frame='FRD')
-                if self.mode=='px4_wrench':
-                    evidence.update(wrench_input='FLU force and torque about uav_base_link',
-                        normalized_input='VehicleThrustSetpoint and VehicleTorqueSetpoint')
-                    required=('flag_control_allocation_enabled','flag_control_offboard_enabled')
-                    filename='wrench_chain.json'
-                else:
-                    evidence['position_setpoint_frame']='NED'
-                    required=tuple(key for key in evidence if key.startswith('flag_'))
-                    filename='native_chain.json'
-                if not all(evidence[key] for key in required):
-                    raise RuntimeError('PX4 required control stages are not enabled: '+str(evidence))
-                (self.out/filename).write_text(json.dumps(evidence,indent=2));self.native_proven=True
+        status=outputs['control_allocator_status']
+        desired=np.concatenate(normalized_to_physical(outputs['vehicle_thrust_setpoint'].xyz,
+            outputs['vehicle_torque_setpoint'].xyz,self.wrench_scale))
+        # PX4 reports requested minus achieved, including the CoM-to-origin moment.
+        residual=np.concatenate(normalized_to_physical(status.unallocated_thrust,
+            status.unallocated_torque,self.wrench_scale))
+        mode=outputs['vehicle_control_mode']
+        evidence={key:bool(getattr(mode,key)) for key in CONTROL_FLAGS}
+        # Refresh graph evidence once per simulated second; check mode flags every tick.
+        if not self.native_proven or t-getattr(self,'chain_graph_time',-1.)>=1.:
+            self.chain_publishers={topic:[dict(node_name=p.node_name,node_namespace=p.node_namespace)
+                for p in self.get_publishers_info_by_topic(topic)] for topic in ACTUATOR_INPUT_TOPICS}
+            self.chain_graph_time=t
+        evidence.update(mode=self.mode,actuator_input_publishers=self.chain_publishers,
+            ros_publishes_actuators=any(self.chain_publishers.values()),
+            actuator_source='PX4 control_allocator',thrust_frame='FRD',
+            wrench_reference_point='uav_base_link',residual_convention='requested_minus_achieved',
+            checked_at_sim_s=t)
+        errors=control_chain_errors(self.mode,evidence)
+        filename='wrench_chain.json' if self.mode=='px4_wrench' else 'native_chain.json'
+        if errors or not self.native_proven or t-getattr(self,'chain_saved_time',-1.)>=1.:
+            evidence['errors']=errors
+            (self.out/filename).write_text(json.dumps(evidence,indent=2));self.chain_saved_time=t
+        if errors:
+            raise RuntimeError('PX4 control ownership check failed: '+'; '.join(errors))
+        self.native_proven=True
         return z,residual,desired
     def send_command(self,command,**params):
         m=VehicleCommand(timestamp=int(self.now()*1e6),command=command,target_system=1,target_component=1,source_system=1,source_component=1,from_external=True,**params)

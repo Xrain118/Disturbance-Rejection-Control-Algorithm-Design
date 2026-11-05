@@ -1,0 +1,1535 @@
+{
+  "passed": true,
+  "runs": [
+    {
+      "run": "px4_native_1",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_native_1/px4/log/2026-11-05/09_29_46.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    },
+    {
+      "run": "px4_native_2",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_native_2/px4/log/2026-11-05/09_44_31.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    },
+    {
+      "run": "px4_native_3",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_native_3/px4/log/2026-11-05/09_59_10.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    },
+    {
+      "run": "px4_wrench_1",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_wrench_1/px4/log/2026-11-05/09_35_56.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    },
+    {
+      "run": "px4_wrench_2",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_wrench_2/px4/log/2026-11-05/09_50_34.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    },
+    {
+      "run": "px4_wrench_3",
+      "ulog": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_wrench_3/px4/log/2026-11-05/10_05_20.ulg",
+      "checked_parameters": {
+        "THR_MDL_FAC": {
+          "requested": 0,
+          "actual": 0.0
+        },
+        "SIM_GZ_EC_FUNC1": {
+          "requested": 101,
+          "actual": 101
+        },
+        "SIM_GZ_EC_MIN1": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX1": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC1": {
+          "requested": 201,
+          "actual": 201
+        },
+        "SIM_GZ_SV_MINA1": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA1": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC2": {
+          "requested": 102,
+          "actual": 102
+        },
+        "SIM_GZ_EC_MIN2": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX2": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC2": {
+          "requested": 202,
+          "actual": 202
+        },
+        "SIM_GZ_SV_MINA2": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA2": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC3": {
+          "requested": 103,
+          "actual": 103
+        },
+        "SIM_GZ_EC_MIN3": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX3": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC3": {
+          "requested": 203,
+          "actual": 203
+        },
+        "SIM_GZ_SV_MINA3": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA3": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC4": {
+          "requested": 104,
+          "actual": 104
+        },
+        "SIM_GZ_EC_MIN4": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX4": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC4": {
+          "requested": 204,
+          "actual": 204
+        },
+        "SIM_GZ_SV_MINA4": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA4": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC5": {
+          "requested": 105,
+          "actual": 105
+        },
+        "SIM_GZ_EC_MIN5": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX5": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC5": {
+          "requested": 205,
+          "actual": 205
+        },
+        "SIM_GZ_SV_MINA5": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA5": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "SIM_GZ_EC_FUNC6": {
+          "requested": 106,
+          "actual": 106
+        },
+        "SIM_GZ_EC_MIN6": {
+          "requested": 0,
+          "actual": 0
+        },
+        "SIM_GZ_EC_MAX6": {
+          "requested": 1000,
+          "actual": 1000
+        },
+        "SIM_GZ_SV_FUNC6": {
+          "requested": 206,
+          "actual": 206
+        },
+        "SIM_GZ_SV_MINA6": {
+          "requested": -90,
+          "actual": -90.0
+        },
+        "SIM_GZ_SV_MAXA6": {
+          "requested": 90,
+          "actual": 90.0
+        },
+        "DF_EN": {
+          "requested": 1,
+          "actual": 1
+        },
+        "CA_AIRFRAME": {
+          "requested": 16,
+          "actual": 16
+        },
+        "CA_METHOD": {
+          "requested": 3,
+          "actual": 3
+        },
+        "DF_MASS": {
+          "requested": 5.415,
+          "actual": 5.414999961853027
+        },
+        "DF_RADIUS": {
+          "requested": 0.6928203230275509,
+          "actual": 0.6928203105926514
+        },
+        "DF_SPACING": {
+          "requested": 0.36,
+          "actual": 0.36000001430511475
+        },
+        "DF_HEIGHT": {
+          "requested": 0.06,
+          "actual": 0.05999999865889549
+        },
+        "DF_HUB": {
+          "requested": 0.038000000000000006,
+          "actual": 0.03799999877810478
+        },
+        "DF_FMAX": {
+          "requested": 17.70705,
+          "actual": 17.707050323486328
+        },
+        "DF_MOMENT": {
+          "requested": 0.02,
+          "actual": 0.019999999552965164
+        },
+        "DF_TILT": {
+          "requested": 1.5707963267948966,
+          "actual": 1.5707963705062866
+        },
+        "DF_TILTRATE": {
+          "requested": 0.5,
+          "actual": 0.5
+        },
+        "DF_ACC": {
+          "requested": 19.62,
+          "actual": 19.6200008392334
+        },
+        "DF_RATE": {
+          "requested": 26.666666666666668,
+          "actual": 26.66666603088379
+        },
+        "MPC_USE_HTE": {
+          "requested": 0,
+          "actual": 0
+        },
+        "MC_BAT_SCALE_EN": {
+          "requested": 0,
+          "actual": 0
+        },
+        "DF_COM_X": {
+          "requested": 0.010771376598448523,
+          "actual": 0.010771377012133598
+        },
+        "DF_COM_Y": {
+          "requested": -1.4095629352350788e-17,
+          "actual": -1.4095629130852747e-17
+        },
+        "DF_COM_Z": {
+          "requested": -0.14164882987868946,
+          "actual": -0.14164882898330688
+        },
+        "DF_IXX": {
+          "requested": 0.6213697632519137,
+          "actual": 0.6213697791099548
+        },
+        "DF_IYY": {
+          "requested": 0.5968909537340759,
+          "actual": 0.596890926361084
+        },
+        "DF_IZZ": {
+          "requested": 0.6286599555266905,
+          "actual": 0.6286599636077881
+        },
+        "DF_IXY": {
+          "requested": -6.505213034913027e-17,
+          "actual": -6.505213034913027e-17
+        },
+        "DF_IXZ": {
+          "requested": 0.010449667230747067,
+          "actual": 0.01044966746121645
+        },
+        "DF_IYZ": {
+          "requested": -3.9898639947466563e-17,
+          "actual": -3.9898639947466563e-17
+        }
+      },
+      "mismatches": {}
+    }
+  ]
+}

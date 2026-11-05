@@ -1,0 +1,31 @@
+Starting >>> dragonfly_interfaces
+Starting >>> dragonfly_arm
+Starting >>> dragonfly_control
+--- stderr: dragonfly_control
+/usr/lib/python3/dist-packages/pkg_resources/__init__.py:116: PkgResourcesDeprecationWarning: 1.1build1 is an invalid version and will not be supported in a future release
+  warnings.warn(
+---
+Finished <<< dragonfly_control [3.97s]
+Finished <<< dragonfly_arm [10.0s]
+Starting >>> dragonfly_sim
+Finished <<< dragonfly_interfaces [14.3s]
+Starting >>> dragonfly_fcu_bridge
+Starting >>> dragonfly_serial
+Finished <<< dragonfly_sim [5.21s]
+--- stderr: dragonfly_fcu_bridge
+/usr/lib/python3/dist-packages/pkg_resources/__init__.py:116: PkgResourcesDeprecationWarning: 1.1build1 is an invalid version and will not be supported in a future release
+  warnings.warn(
+---
+Finished <<< dragonfly_fcu_bridge [5.87s]
+Starting >>> dragonfly_flight
+--- stderr: dragonfly_serial
+/usr/lib/python3/dist-packages/pkg_resources/__init__.py:116: PkgResourcesDeprecationWarning: 1.1build1 is an invalid version and will not be supported in a future release
+  warnings.warn(
+---
+Finished <<< dragonfly_serial [6.15s]
+Starting >>> dragonfly_onboard
+Finished <<< dragonfly_onboard [3.64s]
+Finished <<< dragonfly_flight [33.9s]
+
+Summary: 8 packages finished [55.0s]
+  3 packages had stderr output: dragonfly_control dragonfly_fcu_bridge dragonfly_serial

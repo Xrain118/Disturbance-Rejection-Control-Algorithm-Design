@@ -1,0 +1,2 @@
+Acceptance sequence did not finish in 220 seconds
+Controller exited (1); see controller.log

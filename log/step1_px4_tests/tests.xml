@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="10" failures="0" disabled="0" errors="0" time="0.008" timestamp="2026-11-05T17:21:17.281" name="AllTests">
+  <testsuite name="NativeVector" tests="10" failures="0" disabled="0" skipped="0" errors="0" time="0.008" timestamp="2026-11-05T17:21:17.281">
+    <testcase name="BodyThrustUsesCurrentAttitudeAndWorldForceIsPreserved" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.281" classname="NativeVector" />
+    <testcase name="HTECannotChangeVectorThrustOrIntegral" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="InvalidAttitudeIsRejectedAndNonunitAttitudeIsNormalized" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="StandardMultirotorStillTiltsForHorizontalForce" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="HoverGeometryAndMotorPairsProduceNoOriginMoment" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="TiltGeometryIncludesSharedAxesAndMovingMotorPositions" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="FeasibleWrenchConvergesAndServoRateIsBounded" status="run" result="completed" time="0.001" timestamp="2026-11-05T17:21:17.282" classname="NativeVector" />
+    <testcase name="UnreachableWrenchKeepsEveryActuatorFiniteAndBounded" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.283" classname="NativeVector" />
+    <testcase name="PublishedAllocationResidualAccountsForMotorSpeedSquaredAndServoAngles" status="run" result="completed" time="0" timestamp="2026-11-05T17:21:17.283" classname="NativeVector" />
+    <testcase name="PythonPhysicalBridgeMatchesCppAllocatorWithOffsetAndFullInertia" status="run" result="completed" time="0.005" timestamp="2026-11-05T17:21:17.283" classname="NativeVector" />
+  </testsuite>
+</testsuites>

@@ -59,7 +59,7 @@ def inertial_properties(robot,positions=None):
     inertia = sum(i+m*((p-com)@(p-com)*np.eye(3)-np.outer(p-com, p-com)) for m, p, i in bodies)
     return mass, com, inertia
 
-def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002, sim_share=None):
+def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002, sim_share=None, config_path=None):
     arm_share, flight_share, output = map(Path, (arm_share, flight_share, output))
     if sim_share is None:
         candidate = arm_share.parent / 'dragonfly_sim'
@@ -67,7 +67,12 @@ def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002, s
     sim_share = Path(sim_share)
     output.mkdir(parents=True, exist_ok=True)
     dimensions = yaml.safe_load((arm_share/'config/model_dimensions.yaml').read_text())
-    cfg = yaml.safe_load((flight_share/'config/flight.yaml').read_text())
+    config_source = Path(config_path) if config_path is not None else flight_share/'config/flight.yaml'
+    config_bytes = config_source.read_bytes()
+    cfg = yaml.safe_load(config_bytes)
+    if not isinstance(cfg, dict):
+        raise ValueError('Flight configuration must be a mapping')
+    (output/'flight_config.yaml').write_bytes(config_bytes)
     robot = ET.fromstring(subprocess.check_output(['xacro', str(arm_share/'urdf/dragonfly_arm.urdf.xacro')]))
     robot.remove(robot.find("link[@name='world']"))
     robot.remove(robot.find("joint[@name='world_to_uav']"))

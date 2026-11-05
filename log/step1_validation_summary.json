@@ -1,0 +1,9 @@
+{
+  "python_unique_tests_passed": 48,
+  "cpp_tests_passed": 10,
+  "packages_built": 8,
+  "baseline_native_passes": 3,
+  "baseline_research_passes": 0,
+  "step1_accepted": false,
+  "local_document_links_valid": true
+}

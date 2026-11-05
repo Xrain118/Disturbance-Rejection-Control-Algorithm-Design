@@ -1,0 +1,20 @@
+{
+  "flag_control_position_enabled": false,
+  "flag_control_velocity_enabled": false,
+  "flag_control_attitude_enabled": false,
+  "flag_control_rates_enabled": false,
+  "flag_control_allocation_enabled": true,
+  "flag_control_offboard_enabled": true,
+  "mode": "px4_wrench",
+  "actuator_input_publishers": {
+    "/fmu/in/actuator_motors": [],
+    "/fmu/in/actuator_servos": []
+  },
+  "ros_publishes_actuators": false,
+  "actuator_source": "PX4 control_allocator",
+  "thrust_frame": "FRD",
+  "wrench_reference_point": "uav_base_link",
+  "residual_convention": "requested_minus_achieved",
+  "checked_at_sim_s": 240.264,
+  "errors": []
+}

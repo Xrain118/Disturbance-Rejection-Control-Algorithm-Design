@@ -1,0 +1,89 @@
+thrust_to_weight: 2.0
+max_rotor_speed: 1000.0
+motor_time_constant: 0.05
+moment_constant: 0.02
+tilt_limit: 1.5707963267948966
+tilt_rate: 0.5
+tilt_effort: 8.0
+tilt_kp: 40.0
+tilt_kd: 0.25
+arm_speed: 0.1
+arm_acceleration: 0.2
+arm_step_degrees: 5.0
+arm_range_degrees: 10.0
+arm_kp:
+- 30.0
+- 30.0
+- 20.0
+- 5.0
+- 10.0
+arm_ki:
+- 1.0
+- 3.0
+- 2.0
+- 0.5
+- 1.0
+arm_kd:
+- 1.0
+- 1.0
+- 0.5
+- 0.1
+- 0.03
+position_kp:
+- 2.0
+- 2.0
+- 3.0
+position_kd:
+- 2.8
+- 2.8
+- 3.2
+attitude_kp:
+- 8.0
+- 8.0
+- 5.0
+attitude_kd:
+- 4.0
+- 4.0
+- 3.0
+hover_height: 1.6
+feedforward_force_limit:
+- 15.0
+- 15.0
+- 20.0
+feedforward_torque_limit:
+- 3.0
+- 3.0
+- 3.0
+ndob:
+  enabled: false
+  shadow_mode: true
+  compensation_enabled: false
+  translation_gain:
+  - 6.0
+  - 6.0
+  - 6.0
+  rotation_gain:
+  - 6.0
+  - 6.0
+  - 6.0
+  force_limit:
+  - 20.0
+  - 20.0
+  - 20.0
+  torque_limit:
+  - 3.0
+  - 3.0
+  - 3.0
+  compensation_force_rate:
+  - 50.0
+  - 50.0
+  - 50.0
+  compensation_torque_rate:
+  - 10.0
+  - 10.0
+  - 10.0
+  state_timeout: 0.2
+  max_input_future: 0.02
+  max_dt: 0.05
+  max_time_jump: 0.5
+  saturation_hold_time: 0.2

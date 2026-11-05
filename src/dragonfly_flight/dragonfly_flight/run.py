@@ -9,8 +9,10 @@ from pathlib import Path
 import signal
 import shlex
 import socket
+import shutil
 import subprocess
 import sys
+import tempfile
 import time
 from ament_index_python.packages import get_package_share_directory, get_package_prefix
 from .model import generate
@@ -91,6 +93,7 @@ def main():
     parser.add_argument('--output',default='log/flight_'+time.strftime('%Y%m%d_%H%M%S'))
     parser.add_argument('--step',type=float,default=.002)
     parser.add_argument('--record',action='store_true')
+    parser.add_argument('--config',help='Full flight YAML for this run; default is the package flight.yaml')
     parser.add_argument('--feedforward',action='store_true',help='Enable model-difference feedforward in px4_wrench mode')
     parser.add_argument('--px4',default=os.environ.get('PX4_ROOT', str(Path.home()/'PX4-Autopilot')))
     args=parser.parse_args()
@@ -113,7 +116,10 @@ def main():
     # discover the same FastDDS interfaces. Domain and GZ partition isolate runs.
     os.environ['ROS_LOCALHOST_ONLY']='0'
     os.environ.setdefault('GZ_PARTITION','dragonfly_flight_'+str(os.getpid()))
-    os.environ['GZ_SIM_SYSTEM_PLUGIN_PATH']=get_package_prefix('dragonfly_flight')+'/lib:'+os.environ.get('GZ_SIM_SYSTEM_PLUGIN_PATH','')
+    physics_library=Path(get_package_prefix('dragonfly_sim'))/'lib/libdragonfly_physics.so'
+    if not physics_library.is_file():
+        raise FileNotFoundError('Build dragonfly_sim before flight: '+str(physics_library))
+    os.environ['GZ_SIM_SYSTEM_PLUGIN_PATH']=str(physics_library.parent)+':'+os.environ.get('GZ_SIM_SYSTEM_PLUGIN_PATH','')
     metadata=generate(
         get_package_share_directory('dragonfly_arm'),
         get_package_share_directory('dragonfly_flight'),
@@ -121,9 +127,12 @@ def main():
         args.mode,
         args.step,
         sim_share=get_package_share_directory('dragonfly_sim'),
+        config_path=args.config,
     )
     (out/'run.json').write_text(json.dumps(vars(args),indent=2))
-    children=[]; logs=[]; critical=[]
+    from .provenance import capture
+    capture(out,args.px4 if args.mode in ('px4_native','px4_wrench','px4_actuators') else None)
+    children=[]; logs=[]; critical=[];px4_workspace=None
     def start(cmd,name,**kwargs):
         log=open(out/(name+'.log'),'w'); logs.append(log)
         proc=subprocess.Popen(cmd,stdout=log,stderr=subprocess.STDOUT,start_new_session=True,**kwargs)
@@ -177,9 +186,15 @@ def main():
             startup=out/'px4_startup.sh'
             startup.write_text('. '+shlex.quote(str(px4/'build/px4_sitl_default/etc/init.d-posix/rcS'))+'\n'+
                                '\n'.join(f'param set {k} {v}' for k,v in params.items())+'\n')
-            instance=out/'px4'; instance.mkdir(exist_ok=True)
+            # PX4 rcS uses unquoted pwd/glob expressions internally. Its working
+            # directory must have no spaces even when the project/output does.
+            px4_workspace=tempfile.TemporaryDirectory(prefix='dragonfly_px4_')
+            instance=Path(px4_workspace.name)
+            shutil.copyfile(startup,instance/'startup.sh')
+            (out/'px4_workspace.json').write_text(json.dumps({'temporary_workdir':str(instance),
+                'archive':str(out/'px4')},indent=2))
             critical.append(('DDS agent',start(['MicroXRCEAgent','udp4','-p',str(PX4_DDS_PORT)],'dds')))
-            critical.append(('PX4',start([str(px4/'build/px4_sitl_default/bin/px4'),'-d',str(px4/'build/px4_sitl_default/etc'),'-s',os.path.relpath(startup,instance)],
+            critical.append(('PX4',start([str(px4/'build/px4_sitl_default/bin/px4'),'-d',str(px4/'build/px4_sitl_default/etc'),'-s','startup.sh'],
                   'px4',cwd=instance,env=env)))
             if args.mode=='px4_wrench':
                 model_version=hashlib.sha256((out/'model.json').read_bytes()).hexdigest()
@@ -231,5 +246,8 @@ def main():
             try: p.wait(timeout=max(.01,deadline-time.monotonic()))
             except subprocess.TimeoutExpired: os.killpg(p.pid,signal.SIGKILL); p.wait()
         for f in logs: f.close()
+        if px4_workspace is not None:
+            shutil.copytree(px4_workspace.name,out/'px4',symlinks=True,dirs_exist_ok=True)
+            px4_workspace.cleanup()
 
 if __name__=='__main__': main()

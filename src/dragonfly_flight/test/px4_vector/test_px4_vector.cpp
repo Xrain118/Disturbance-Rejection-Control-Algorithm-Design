@@ -4,6 +4,7 @@
 #include <geo/geo.h>
 #include <px4_platform_common/init.h>
 #include <lib/parameters/param.h>
+#include "bridge_fixture.hpp"
 
 using namespace matrix;
 
@@ -130,6 +131,33 @@ TEST(NativeVector, PublishedAllocationResidualAccountsForMotorSpeedSquaredAndSer
     EXPECT_LT(DragonflyAllocation::Wrench(achieved-desired).norm(),.001f);
     auto clipped=out;clipped(0)=0.f;allocator.setActuatorSetpoint(clipped);
     EXPECT_GT(DragonflyAllocation::Wrench(allocator.getAllocatedControl()-desired).norm(),.01f);
+}
+
+TEST(NativeVector, PythonPhysicalBridgeMatchesCppAllocatorWithOffsetAndFullInertia)
+{
+    const char *names[]={"DF_MASS","DF_ACC","DF_RATE","DF_FMAX","DF_COM_X","DF_COM_Y","DF_COM_Z",
+        "DF_IXX","DF_IYY","DF_IZZ","DF_IXY","DF_IXZ","DF_IYZ"};
+    const float values[]={5.415f,19.62f,4.f/.15f,5.415f*19.62f/6.f,.02f,.03f,-.14f,.6f,.7f,.8f,.01f,.02f,.03f};
+    float saved[13];
+    for(int i=0;i<13;++i) { param_get(param_find(names[i]),&saved[i]);param_set_no_notification(param_find(names[i]),&values[i]); }
+    ControlAllocationDragonfly allocator;
+    Matrix<float,6,16> effectiveness;Vector<float,16> trim,lower,upper;upper.setAll(1.f);
+    allocator.setEffectivenessMatrix(effectiveness,trim,trim,12,false);
+    for(int i=6;i<12;++i) { lower(i)=-1.f; }
+    allocator.setActuatorMin(lower);allocator.setActuatorMax(upper);
+    Vector<float,6> desired;
+    for(int i=0;i<6;++i) { desired(i)=bridge_control[i]; }
+    allocator.setControlSetpoint(desired);
+    for(int k=0;k<500;++k) { allocator.allocate(); }
+    const auto out=allocator.getActuatorSetpoint();
+    DragonflyAllocation physical;physical.geometry.mass=5.415f;physical.geometry.max_thrust=values[3];
+    DragonflyAllocation::State state;
+    for(int i=0;i<6;++i) { state(i)=out(i)*out(i)*values[3];state(i+6)=out(i+6)*physical.geometry.tilt_limit; }
+    const auto wrench=physical.wrench(state);
+    for(int i=0;i<6;++i) { EXPECT_NEAR(wrench(i),bridge_physical[i],.03f); }
+    const auto achieved=allocator.getAllocatedControl();
+    for(int i=0;i<6;++i) { EXPECT_NEAR(achieved(i),desired(i),.002f); }
+    for(int i=0;i<13;++i) { param_set_no_notification(param_find(names[i]),&saved[i]); }
 }
 
 int main(int argc,char **argv)

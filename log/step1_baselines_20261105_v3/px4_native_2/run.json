@@ -1,0 +1,11 @@
+{
+  "mode": "px4_native",
+  "gui": false,
+  "scenario": "acceptance",
+  "output": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/px4_native_2",
+  "step": 0.002,
+  "record": true,
+  "config": "/mnt/e/subjects/Disturbance Rejection Control Algorithm Design/log/step1_baselines_20261105_v3/baseline_config.yaml",
+  "feedforward": false,
+  "px4": "/home/ubuntu/PX4-Autopilot"
+}

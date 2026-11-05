@@ -1,0 +1,127 @@
+{
+  "hover_seconds": 29.999999999999993,
+  "position_rms": 0.03003269179674131,
+  "attitude_rms_deg": 0.6277113976503996,
+  "longest_saturation_seconds": 0.0,
+  "hover_pass": true,
+  "tracking_errors_at_5s": {
+    "track0": 0.015115610090815353,
+    "track1": 0.033382847812350305,
+    "track2": 0.04911454422147995,
+    "track3": 0.02863070561887208
+  },
+  "arm_peak_position": 0.06298492898172556,
+  "arm_peak_angle_deg": 1.7028629623579048,
+  "passed": true,
+  "arm_metrics": {
+    "left": {
+      "peak_axis_error_m": {
+        "x": 0.03906948616159665,
+        "y": 0.018701235515348455,
+        "z": 0.024162084468070333
+      },
+      "rms_axis_error_m": {
+        "x": 0.02184559651269989,
+        "y": 0.01054464037204101,
+        "z": 0.012018422764568186
+      },
+      "peak_position_error_m": 0.039938861851401435,
+      "rms_position_error_m": 0.027071424294248976,
+      "peak_attitude_error_deg": 1.7028629623579048,
+      "rms_attitude_error_deg": 1.1153579550643953,
+      "incremental_position_peak_m": 0.046093561972828656,
+      "incremental_attitude_peak_deg": 1.7421624228790171,
+      "recovery_position_at_5s_m": 0.0350485599559374,
+      "recovery_attitude_at_5s_deg": 0.666474302782791,
+      "settling_time_s": 0.0,
+      "shoulder_travel_deg": 4.839848363881008,
+      "longest_saturation_seconds": 0.0
+    },
+    "right": {
+      "peak_axis_error_m": {
+        "x": 0.037411103565737125,
+        "y": 0.023768060119871384,
+        "z": 0.010643692879963806
+      },
+      "rms_axis_error_m": {
+        "x": 0.021534754718205724,
+        "y": 0.014339872909782714,
+        "z": 0.006372129764349158
+      },
+      "peak_position_error_m": 0.041858065502773295,
+      "rms_position_error_m": 0.026645480922207206,
+      "peak_attitude_error_deg": 1.4829791757864956,
+      "rms_attitude_error_deg": 0.9712136685023542,
+      "incremental_position_peak_m": 0.0777163618158344,
+      "incremental_attitude_peak_deg": 1.8103531831090114,
+      "recovery_position_at_5s_m": 0.058878334998576726,
+      "recovery_attitude_at_5s_deg": 0.5793506947226034,
+      "settling_time_s": 0.0,
+      "shoulder_travel_deg": 4.847426855469976,
+      "longest_saturation_seconds": 0.0
+    }
+  },
+  "arm_recovery": {
+    "left": {
+      "position": 0.0350485599559374,
+      "angle_deg": 0.666474302782791,
+      "shoulder_travel_deg": 4.839848363881008
+    },
+    "right": {
+      "position": 0.058878334998576726,
+      "angle_deg": 0.5793506947226034,
+      "shoulder_travel_deg": 4.847426855469976
+    }
+  },
+  "sampled_gear_clearance_pass": true,
+  "max_arm_effort_nm": 0.835393,
+  "max_tilt_effort_nm": 0.269905,
+  "arm_effort_limits_nm": {
+    "left_joint_1": 2.941995,
+    "left_joint_2": 5.88399,
+    "left_joint_3": 2.941995,
+    "left_joint_4": 2.941995,
+    "left_joint_5": 2.941995,
+    "right_joint_1": 2.941995,
+    "right_joint_2": 5.88399,
+    "right_joint_3": 2.941995,
+    "right_joint_4": 2.941995,
+    "right_joint_5": 2.941995
+  },
+  "max_arm_effort_per_joint_nm": {
+    "left_joint_1": 4.52949e-08,
+    "left_joint_2": 0.834967,
+    "left_joint_3": 0.689014,
+    "left_joint_4": 0.175791,
+    "left_joint_5": 4.9194e-10,
+    "right_joint_1": 3.50605e-09,
+    "right_joint_2": 0.835393,
+    "right_joint_3": 0.688972,
+    "right_joint_4": 0.175645,
+    "right_joint_5": 1.18008e-08
+  },
+  "max_arm_effort_ratio": 0.2341995822562581,
+  "arm_effort_limits_pass": true,
+  "rotor_mode": true,
+  "native_control_chain": {
+    "flag_control_position_enabled": true,
+    "flag_control_velocity_enabled": true,
+    "flag_control_attitude_enabled": true,
+    "flag_control_rates_enabled": true,
+    "flag_control_allocation_enabled": true,
+    "flag_control_offboard_enabled": true,
+    "mode": "px4_native",
+    "actuator_input_publishers": {
+      "/fmu/in/actuator_motors": [],
+      "/fmu/in/actuator_servos": []
+    },
+    "ros_publishes_actuators": false,
+    "actuator_source": "PX4 control_allocator",
+    "thrust_frame": "FRD",
+    "wrench_reference_point": "uav_base_link",
+    "residual_convention": "requested_minus_achieved",
+    "checked_at_sim_s": 169.45000000000002,
+    "errors": []
+  },
+  "control_chain_errors": []
+}

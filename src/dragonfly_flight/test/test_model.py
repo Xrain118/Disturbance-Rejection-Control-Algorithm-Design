@@ -53,6 +53,24 @@ def test_mass_and_named_efforts_reach_all_generated_interfaces(assets):
         assert params['DF_I' + 'XYZ'[row] + 'XYZ'[col]] == pytest.approx(inertia[row, col])
 
 
+def test_run_config_is_used_and_snapshotted_without_changing_default(tmp_path):
+    import yaml
+    from dragonfly_flight.baseline import baseline_config
+    source=Path(__file__).resolve().parents[2]
+    default=source/'dragonfly_flight/config/flight.yaml'
+    original=default.read_bytes();cfg=yaml.safe_load(original)
+    configured=baseline_config(cfg)
+    assert configured['ndob']['enabled'] is False
+    assert configured['ndob']['compensation_enabled'] is False
+    assert cfg==yaml.safe_load(original)
+    custom=tmp_path/'custom.yaml';custom.write_text(yaml.safe_dump(configured))
+    output=tmp_path/'run'
+    data=generate(source/'dragonfly_arm',source/'dragonfly_flight',output,'px4_wrench',config_path=custom)
+    assert data['config']==configured
+    assert (output/'flight_config.yaml').read_bytes()==custom.read_bytes()
+    assert default.read_bytes()==original
+
+
 def test_coupled_dynamics_uses_the_same_generated_mass_properties(assets):
     output,metadata=assets;dynamics=CoupledDynamics.from_urdf(output/'robot.urdf')
     zero=np.zeros(10)
@@ -64,6 +82,20 @@ def test_coupled_dynamics_uses_the_same_generated_mass_properties(assets):
     expected_force=np.array([0.,0.,mass*9.81])
     assert result.wrench[:3]==pytest.approx(expected_force)
     assert result.wrench[3:]==pytest.approx(np.cross(com,expected_force))
+
+
+def test_generated_motor_channels_match_shared_tilt_unit_order(assets):
+    from dragonfly_flight.core import TILT_NAMES
+    output,metadata=assets
+    world=ET.fromstring((output/'world.sdf').read_text().replace('gz:systems:priority','gazebo_systems_priority'))
+    motors=world.findall(".//plugin[@name='gz::sim::systems::MulticopterMotorModel']")
+    assert len(motors)==6
+    for index,(unit,side) in enumerate((u,s) for u in 'abc' for s in ('left','right')):
+        assert motors[index].findtext('jointName')==f'unit_{unit}_rotor_{side}_joint'
+        assert int(motors[index].findtext('motorNumber'))==index
+        assert motors[index].findtext('turningDirection')==('ccw' if index%2==0 else 'cw')
+        assert float(motors[index].findtext('motorConstant'))*metadata['config']['max_rotor_speed']**2==pytest.approx(metadata['max_thrust'])
+    assert TILT_NAMES==[f'unit_{u}_{axis}_joint' for u in 'abc' for axis in ('outer','inner')]
 
 
 def test_joint_names_control_order_and_saturation_instead_of_global_maximum():
