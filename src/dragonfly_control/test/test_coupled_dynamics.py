@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from dragonfly_flight.coupled_dynamics import CoupledDynamics
+from dragonfly_control.coupled_dynamics import CoupledDynamics
 
 
 def _inertial(mass, xyz, offset=0.0):

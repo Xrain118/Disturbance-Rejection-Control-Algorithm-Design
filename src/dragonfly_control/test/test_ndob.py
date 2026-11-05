@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 from scipy.spatial.transform import Rotation
 
-from dragonfly_flight.ndob import (
+from dragonfly_control.ndob import (
     MomentumNdob,
     NdobConfig,
     coupled_momentum_and_bias,

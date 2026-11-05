@@ -3,7 +3,7 @@
 
 Avoids WSLg screenshot limitations. Cameras have no collision/inertia and
 are deleted after each capture. This script does not move robot joints.
-Run after gazebo.launch.py (unpaused). Requires ros_gz_image and Pillow.
+Run after dragonfly_sim/gazebo.launch.py (unpaused). Requires ros_gz_image and Pillow.
 """
 import argparse
 import math

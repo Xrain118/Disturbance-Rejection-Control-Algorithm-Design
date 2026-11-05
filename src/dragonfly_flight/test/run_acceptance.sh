@@ -6,7 +6,7 @@ export PYTHONNOUSERSITE=1 ROS_DOMAIN_ID=73 ROS_LOCALHOST_ONLY=0
 source "$ROS_SETUP"
 source "$GZ_CONTROL_WS/install/setup.bash"
 source "$PX4_ROS_WS/install/setup.bash"
-source install-flight/setup.bash
+source install-sim/setup.bash
 prefix="${1:-log/acceptance_$(date +%Y%m%d_%H%M%S)}"
 for round in 1 2 3; do
   ros2 run dragonfly_flight flight --scenario acceptance --record --output "${prefix}_$round"

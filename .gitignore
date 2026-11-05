@@ -17,5 +17,9 @@ src/dragonfly_flight/config/px4_vector/original/
 
 build-hardware/
 install-hardware/
+/build-onboard/
+/install-onboard/
+/build-sim/
+/install-sim/
 /build-ndob-sitl/
 /install-ndob-sitl/

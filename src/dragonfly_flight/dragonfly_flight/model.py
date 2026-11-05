@@ -59,8 +59,12 @@ def inertial_properties(robot,positions=None):
     inertia = sum(i+m*((p-com)@(p-com)*np.eye(3)-np.outer(p-com, p-com)) for m, p, i in bodies)
     return mass, com, inertia
 
-def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002):
+def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002, sim_share=None):
     arm_share, flight_share, output = map(Path, (arm_share, flight_share, output))
+    if sim_share is None:
+        candidate = arm_share.parent / 'dragonfly_sim'
+        sim_share = candidate if candidate.is_dir() else arm_share
+    sim_share = Path(sim_share)
     output.mkdir(parents=True, exist_ok=True)
     dimensions = yaml.safe_load((arm_share/'config/model_dimensions.yaml').read_text())
     cfg = yaml.safe_load((flight_share/'config/flight.yaml').read_text())
@@ -156,7 +160,7 @@ def generate(arm_share, flight_share, output, mode='px4_actuators', step=.002):
                       motorNumber=k, rotorDragCoefficient=0, rollingMomentCoefficient=0,
                       rotorVelocitySlowdownSim=10, motorType='velocity')
         for key, value in values.items(): element(plugin, key, value)
-    world = ET.parse(arm_share/'worlds/model_preview.world')
+    world = ET.parse(sim_share/'worlds/model_preview.world')
     w = world.getroot().find('world')
     w.find('physics/max_step_size').text = str(step)
     # Slower than wall time gives Python control deterministic scheduling headroom.

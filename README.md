@@ -4,7 +4,7 @@
 
 研究双臂运动与外扰下的无人机稳定控制。当前交付包括 Dragonfly 仿真源码复用、双 ESP32 主动遥测接入、厂家参数电流力矩粗估、记录及回放。第一版动力学前馈、六维 wrench 飞控桥接和飞行基座六维净残差 NDOB 已接入代码；NDOB 默认关闭，支持影子运行和独立补偿开关。ROS／Gazebo／PX4 动态验收及实机验证仍未完成。原生 PX4 仿真作为独立基线，不连接真实机械臂。
 
-[产品需求](产品需求.md) · [当前进度](当前进度.md) · [软件架构](软件架构.md) · [NDOB 说明](docs/ndob.md) · [遥测协议](docs/telemetry-protocol.md) · [固件部署与修改](docs/firmware.md) · [验证记录](docs/verification-20261018.md)
+[产品需求](产品需求.md) · [当前进度](当前进度.md) · [软件架构](软件架构.md) · [仿真与机载部署](docs/deployment-layout.md) · [NDOB 说明](docs/ndob.md) · [遥测协议](docs/telemetry-protocol.md) · [固件部署与修改](docs/firmware.md) · [验证记录](docs/verification-20261018.md)
 
 ## 构建与采集
 
@@ -16,6 +16,17 @@ bash scripts/build_hardware.sh
 source install-hardware/setup.bash
 ros2 launch dragonfly_serial dual_arm_serial.launch.py
 ```
+
+完整机载部署使用独立的无 Gazebo 构建：
+
+```bash
+bash scripts/build_onboard.sh
+source install-onboard/setup.bash
+ros2 launch dragonfly_onboard onboard.launch.py \
+  arm_config:=/absolute/path/to/dual_arm_serial.yaml
+```
+
+该入口默认不启动飞控 wrench 桥。当前 `dragonfly_flight` 仍是依赖仿真时钟和真值的 SITL 运行时，不能直接放到机载电脑。包边界和后续接入条件见[仿真与机载部署](docs/deployment-layout.md)。
 
 启动前编辑 [双串口配置](src/dragonfly_serial/config/dual_arm_serial.yaml)，将两个占位路径替换为明确的 `/dev/serial/by-id/...`，填写实机设备 ID；不自动扫描、不猜左右。可复制 YAML 并通过 `config:=/absolute/path.yaml` 指定，也可直接覆盖节点参数：
 
@@ -56,7 +67,7 @@ ros2 run dragonfly_serial telemetry_replay /tmp/arms-session-001.jsonl --speed 1
 外部依赖集中在 [scripts/env.sh](scripts/env.sh)，支持 `ROS_SETUP`、`GZ_CONTROL_WS`、`PX4_ROS_WS`、`PX4_ROOT`、`XRCE_AGENT_ROOT`。可在未跟踪的 `config/local.env` 中覆盖。普通构建不修改共享 PX4；只有显式执行 `bash scripts/prepare_px4.sh` 才检查版本、应用补丁并构建 PX4。该步骤本次没有执行，沿用本机已准备的外部依赖。
 
 ```bash
-bash src/dragonfly_flight/scripts/build.sh
+bash scripts/build_sim.sh
 bash scripts/test.sh
 bash scripts/smoke.sh
 # 飞行基线按继承说明显式运行，默认不启动硬件采集：

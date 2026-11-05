@@ -195,7 +195,14 @@ class CoupledDynamics:
     @classmethod
     def from_urdf(cls, source, **kwargs):
         """Load from a URDF path, XML string or ElementTree root."""
-        if isinstance(source, (str, Path)) and Path(source).is_file():
+        is_file = False
+        if isinstance(source, (str, Path)):
+            try:
+                is_file = Path(source).is_file()
+            except OSError:
+                # Long XML strings are not valid filesystem paths on Linux.
+                is_file = False
+        if is_file:
             root = ET.parse(source).getroot()
         elif isinstance(source, str):
             root = ET.fromstring(source)

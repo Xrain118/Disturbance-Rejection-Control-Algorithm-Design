@@ -7,7 +7,7 @@ export ROS_DOMAIN_ID="${ROS_DOMAIN_ID:-73}"
 source "$ROS_SETUP"
 source "$GZ_CONTROL_WS/install/setup.bash"
 source "$PX4_ROS_WS/install/setup.bash"
-source install-flight/setup.bash
+source install-sim/setup.bash
 if [[ "${1:-}" == keyboard ]]; then
   exec ros2 run dragonfly_flight keyboard
 fi

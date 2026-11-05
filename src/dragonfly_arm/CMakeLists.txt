@@ -14,16 +14,10 @@ rosidl_generate_interfaces(${PROJECT_NAME}
 ament_python_install_package(dragonfly_arm_kinematics)
 
 install(
-  DIRECTORY config launch urdf worlds docs
+  DIRECTORY config urdf docs
   DESTINATION share/${PROJECT_NAME}
   PATTERN "__pycache__" EXCLUDE
   PATTERN "*.pyc" EXCLUDE
-)
-
-install(
-  PROGRAMS scripts/demo_trajectory.py
-  DESTINATION lib/${PROJECT_NAME}
-  RENAME demo_trajectory
 )
 
 install(

@@ -26,7 +26,7 @@ def generate_launch_description():
         [package_share, "urdf", "dragonfly_arm.urdf.xacro"]
     )
     world_file = PathJoinSubstitution(
-        [package_share, "worlds", "model_preview.world"]
+        [FindPackageShare("dragonfly_sim"), "worlds", "model_preview.world"]
     )
     controller_file = PathJoinSubstitution(
         [package_share, "config", "controllers.yaml"]

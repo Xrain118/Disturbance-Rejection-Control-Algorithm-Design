@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from dragonfly_flight.feedforward import ModelFeedforward
+from dragonfly_control.feedforward import ModelFeedforward
 from test_coupled_dynamics import _model, _state
 
 

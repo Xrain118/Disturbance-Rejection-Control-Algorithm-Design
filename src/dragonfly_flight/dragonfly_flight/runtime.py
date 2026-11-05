@@ -25,9 +25,9 @@ from .core import Platform, Allocator, NED_ENU, FRD_FLU, px4_rotation, smoothste
 from .arms import ArmCommands
 from .clearance import GearClearance
 from .effort import ordered_arm_effort_limits, arm_effort_ratios
-from .coupled_dynamics import CoupledDynamics
-from .feedforward import ModelFeedforward
-from .ndob import MomentumNdob, coupled_momentum_and_bias, subtract_disturbance
+from dragonfly_control.coupled_dynamics import CoupledDynamics
+from dragonfly_control.feedforward import ModelFeedforward
+from dragonfly_control.ndob import MomentumNdob, coupled_momentum_and_bias, subtract_disturbance
 
 class Runtime(Node):
     def __init__(self,out,scenario,feedforward=False):

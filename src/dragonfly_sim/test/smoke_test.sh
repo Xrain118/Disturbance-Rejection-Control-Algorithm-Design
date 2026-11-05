@@ -22,7 +22,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
-setsid ros2 launch dragonfly_arm demo.launch.py gui:=false >"${smoke_log}" 2>&1 &
+setsid ros2 launch dragonfly_sim demo.launch.py gui:=false >"${smoke_log}" 2>&1 &
 launch_pid=$!
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

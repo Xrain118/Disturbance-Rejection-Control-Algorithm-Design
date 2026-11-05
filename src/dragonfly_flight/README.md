@@ -6,17 +6,17 @@
 
 ## 构建与环境
 
-本机版本：Ubuntu 22.04、ROS 2 Humble、Gazebo Harmonic 8.15、PX4 v1.16.2、Micro XRCE-DDS Agent v2.4.3，以及 `/home/ubuntu/px4_ros2_ws` 的兼容消息。单独使用 `build-flight` / `install-flight`，原源码改动和构建目录保留。
+本机版本：Ubuntu 22.04、ROS 2 Humble、Gazebo Harmonic 8.15、PX4 v1.16.2、Micro XRCE-DDS Agent v2.4.3，以及 `/home/ubuntu/px4_ros2_ws` 的兼容消息。仿真使用 `build-sim` / `install-sim`；机载构建使用独立的 `build-onboard` / `install-onboard`，不包含本包。
 
 ```bash
 cd "/home/ubuntu/Disturbance Rejection Control Algorithm Design"
-bash src/dragonfly_flight/scripts/build.sh
+bash scripts/build_sim.sh
 export PYTHONNOUSERSITE=1
 source /opt/ros/humble/setup.bash
 source scripts/env.sh
 source "$GZ_CONTROL_WS/install/setup.bash"
 source "$PX4_ROS_WS/install/setup.bash"
-source install-flight/setup.bash
+source install-sim/setup.bash
 ```
 
 构建脚本设置 `PYTHONNOUSERSITE=1`，PX4 使用的 `jsonschema` 必须可由系统 Python 导入；本机于 2026-10-12 补齐系统包 `python3-jsonschema`（Ubuntu 可执行 `sudo apt-get install python3-jsonschema`）。构建不会自动安装系统依赖。
@@ -33,7 +33,7 @@ source install-flight/setup.bash
 
 ```bash
 # 原固定机体演示（位置接口）
-ros2 launch dragonfly_arm gazebo.launch.py
+ros2 launch dragonfly_sim gazebo.launch.py
 
 # 理想合力/合力矩调试，不启动 PX4 或旋翼模型
 ros2 run dragonfly_flight flight --mode ideal_wrench --scenario hover --gui
@@ -96,8 +96,8 @@ ros2 run dragonfly_flight flight --mode ideal_wrench --scenario force_x --output
 ros2 run dragonfly_flight flight --mode physics --scenario physics --step .002 --output log/my_momentum
 # .001、.0005 步长使用新目录重复。
 
-colcon test --build-base build-flight --install-base install-flight --packages-select dragonfly_arm dragonfly_flight
-colcon test-result --test-result-base build-flight --verbose
+colcon test --build-base build-sim --install-base install-sim --packages-select dragonfly_arm dragonfly_control dragonfly_flight dragonfly_sim
+colcon test-result --test-result-base build-sim --verbose
 ```
 
 Gazebo 真值验收：30 s 位置 RMS ≤0.10 m、姿态 RMS ≤3°、饱和不持续超过 1 s；平移完成 5 s 后误差 ≤0.10 m；动臂峰值 ≤0.25 m / 8°、动作结束 5 s 后 ≤0.10 m / 3°。实际肩关节行程必须达到 4.5°，避免把未执行动作算作通过。理想力成绩不能用于旋翼悬停验收。

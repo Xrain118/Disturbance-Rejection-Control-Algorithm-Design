@@ -16,7 +16,7 @@ def generate_launch_description():
     gazebo_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution(
-                [FindPackageShare("dragonfly_arm"), "launch", "gazebo.launch.py"]
+                [FindPackageShare("dragonfly_sim"), "launch", "gazebo.launch.py"]
             )
         ),
         launch_arguments={
@@ -27,7 +27,7 @@ def generate_launch_description():
     )
 
     demo_node = Node(
-        package="dragonfly_arm",
+        package="dragonfly_sim",
         executable="demo_trajectory",
         name="demo_trajectory",
         output="screen",

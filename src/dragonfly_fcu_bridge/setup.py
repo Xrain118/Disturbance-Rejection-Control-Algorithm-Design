@@ -8,8 +8,8 @@ setup(
     data_files=[
         ("share/ament_index/resource_index/packages", ["resource/dragonfly_fcu_bridge"]),
         ("share/dragonfly_fcu_bridge", ["package.xml"]),
-        ("share/dragonfly_fcu_bridge/config", glob("config/*")),
-        ("share/dragonfly_fcu_bridge/launch", glob("launch/*")),
+        ("share/dragonfly_fcu_bridge/config", glob("config/*.yaml")),
+        ("share/dragonfly_fcu_bridge/launch", glob("launch/*.launch.py")),
     ],
     install_requires=["setuptools", "numpy"],
     zip_safe=True,

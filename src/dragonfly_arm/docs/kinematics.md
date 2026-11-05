@@ -127,7 +127,7 @@ if result.success:
 
 `forward()` 和 `jacobian()` 接受五个有限关节角，可计算限位外位置用于分析；需要执行前限制时调用 `within_limits()` 或使用受限逆解。`inverse()`、`inverse_task()` 返回 `IKResult`，包含 `status`、`message`、`solutions`、`selected`；失败时 `selected=None`。
 
-`ros2 launch dragonfly_arm gazebo.launch.py` 会自动启动运动学节点；单独启动计算接口使用：
+`ros2 launch dragonfly_sim gazebo.launch.py` 会自动启动运动学节点；单独启动计算接口使用：
 
 ```bash
 ros2 run dragonfly_arm kinematics_node
@@ -208,7 +208,7 @@ rclpy.shutdown()
 colcon test --packages-select dragonfly_arm --event-handlers console_direct+
 colcon test-result --verbose
 ROS_DOMAIN_ID=72 ROS_LOCALHOST_ONLY=1 GZ_PARTITION=dragonfly_roarm_validation \
-  bash src/dragonfly_arm/test/smoke_test.sh log/roarm_validation
+  bash src/dragonfly_sim/test/smoke_test.sh log/roarm_validation
 ```
 
 测试覆盖源参数与已知初始点、随机全范围 FK/IK 回算和全部候选复核、±π 两端与累计角跨界、基座轴线和肘部共线、不可达/限位/姿态错误、雅可比有限差分、独立 URDF 链对照，以及 ROS 消息校验。冒烟测试最后可保存三张实际场景图；不会连接 Arduino 或实物。

@@ -57,5 +57,5 @@ def test_native_arming_warmup_holds_estimated_position():
 
 def test_native_output_expiry_aborts_instead_of_using_old_actuator_commands():
     item=SimpleNamespace(native_outputs={},native_times={})
-    with pytest.raises(RuntimeError,match='telemetry missing'):
+    with pytest.raises(RuntimeError,match='telemetry stale'):
         Runtime.native_state(item,5.)

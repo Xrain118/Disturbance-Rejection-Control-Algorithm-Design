@@ -114,7 +114,14 @@ def main():
     os.environ['ROS_LOCALHOST_ONLY']='0'
     os.environ.setdefault('GZ_PARTITION','dragonfly_flight_'+str(os.getpid()))
     os.environ['GZ_SIM_SYSTEM_PLUGIN_PATH']=get_package_prefix('dragonfly_flight')+'/lib:'+os.environ.get('GZ_SIM_SYSTEM_PLUGIN_PATH','')
-    metadata=generate(get_package_share_directory('dragonfly_arm'),get_package_share_directory('dragonfly_flight'),out,args.mode,args.step)
+    metadata=generate(
+        get_package_share_directory('dragonfly_arm'),
+        get_package_share_directory('dragonfly_flight'),
+        out,
+        args.mode,
+        args.step,
+        sim_share=get_package_share_directory('dragonfly_sim'),
+    )
     (out/'run.json').write_text(json.dumps(vars(args),indent=2))
     children=[]; logs=[]; critical=[]
     def start(cmd,name,**kwargs):

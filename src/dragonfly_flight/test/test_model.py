@@ -8,7 +8,7 @@ from dragonfly_flight.model import generate
 from dragonfly_flight.native import px4_parameters
 from dragonfly_flight.effort import ordered_arm_effort_limits, arm_effort_ratios
 from dragonfly_flight.core import ARM_NAMES
-from dragonfly_flight.coupled_dynamics import CoupledDynamics
+from dragonfly_control.coupled_dynamics import CoupledDynamics
 
 
 NAMES = [name for side in ('left', 'right') for name in ARM_NAMES[side]]
